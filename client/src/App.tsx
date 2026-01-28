@@ -8,10 +8,12 @@ import MyProjects from './pages/MyProjects'
 import Preview from './pages/Preview'
 import Community from './pages/Community'
 import { View } from 'lucide-react'
+import Navbar from './components/Navbar'
 
 const App = () => {
   return (
     <div>
+      <Navbar/>
       <Routes>  
         <Route path='/' element={<Home />} />
         <Route path='/pricing' element={<Pricing/>} />
