@@ -1,19 +1,25 @@
 
-import React from 'react'
-import { Route, Routes } from 'react-router-dom'
+
+import { Route, Routes, useLocation } from 'react-router-dom'
 import Home from './pages/Home'
 import Pricing from './pages/Pricing'
 import Projects from './pages/Projects'
 import MyProjects from './pages/MyProjects'
 import Preview from './pages/Preview'
-import Community from './pages/Community'
 import { View } from 'lucide-react'
 import Navbar from './components/Navbar'
 
 const App = () => {
+
+  const {pathname} = useLocation()
+
+  const hideNavbar = pathname.startsWith('/projects/') && pathname !== '/projects' || pathname.startsWith('/view/')
+            || pathname.startsWith('/preview/') 
+
   return (
     <div>
-      <Navbar/>
+      {!hideNavbar && <Navbar/>}
+      
       <Routes>  
         <Route path='/' element={<Home />} />
         <Route path='/pricing' element={<Pricing/>} />
@@ -21,7 +27,6 @@ const App = () => {
         <Route path='/projects' element={<MyProjects/>} />
         <Route path='/preview/:projectId' element={<Preview/>} />
         <Route path='/preview/:projectId/:VersionId' element={<Preview/>} />
-         <Route path='/community' element={<Community/>} />
          <Route path='/view/:projectId' element={<View/>} />
       </Routes>
     </div>

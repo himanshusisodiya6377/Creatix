@@ -15,7 +15,6 @@ const Navbar = () => {
           <div className="hidden md:flex items-center gap-8 transition duration-500">
             <Link to='/' >Home</Link>
             <Link to='/projects' >My Projects</Link>
-            <Link to='/community' >Community</Link>
             <Link to='/pricing' >Pricing</Link>
             
           </div>
