@@ -6,8 +6,11 @@ import Pricing from './pages/Pricing'
 import Projects from './pages/Projects'
 import MyProjects from './pages/MyProjects'
 import Preview from './pages/Preview'
-import { View } from 'lucide-react'
+import {  View } from 'lucide-react'
 import Navbar from './components/Navbar'
+import {Toaster} from "sonner"
+import AuthPage from "./pages/auth/AuthPage"
+import Settings from './pages/setting'
 
 const App = () => {
 
@@ -18,6 +21,7 @@ const App = () => {
 
   return (
     <div>
+      <Toaster/>
       {!hideNavbar && <Navbar/>}
       
       <Routes>  
@@ -28,6 +32,8 @@ const App = () => {
         <Route path='/preview/:projectId' element={<Preview/>} />
         <Route path='/preview/:projectId/:VersionId' element={<Preview/>} />
          <Route path='/view/:projectId' element={<View/>} />
+         <Route path="/auth/:pathname" element={<AuthPage />} />
+         <Route path="/account/settings" element={<Settings />} />
       </Routes>
     </div>
   )
