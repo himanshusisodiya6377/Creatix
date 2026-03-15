@@ -15,7 +15,7 @@ export const auth = betterAuth({
       deleteUser:{enabled:true}
   },
   trustedOrigins,
-baseURL: process.env.BETTER_AUTH_URL!,
+baseURL: process.env.BETTER_AUTH_BASE_URL!,
 secret: process.env.BETTER_AUTH_SECRET!,
 advanced: {
   cookies: {

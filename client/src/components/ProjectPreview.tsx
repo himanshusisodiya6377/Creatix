@@ -2,6 +2,7 @@ import React, { forwardRef,useEffect,useImperativeHandle,useRef, useState } from
 import type {Project} from  '../types'
 import { iframeScript } from '../assets/assets';
 import EditorPanel from './EditorPanel';
+import LoaderSteps from './LoaderSteps';
 
 interface ProjectPreviewProps {
   project:Project;
@@ -90,8 +91,7 @@ const ProjectPreview = forwardRef<ProjectPreviewRef,ProjectPreviewProps>(({proje
         if(iframeRef.current?.contentWindow){
           iframeRef.current?.contentWindow.postMessage({type:'CLEAR_SELECTION_REQUEST'},'*')
         }
-      }}/>)} </>) : isGenerating && (<div> Loading
-        </div>)}
+      }}/>)} </>) : isGenerating && (<LoaderSteps />)}
       
     </div>
   )
