@@ -5,10 +5,10 @@ import openai from "../configs/openai.js";
 
 // Controller Function to make Revision
 export const makeRevision = async (req: Request, res: Response) => {
-     const userId = req.userId;
+     const userId = req.userId as string;
   try {
     
-    const {projectId} = req.params;
+    const {projectId} = req.params as { projectId: string };
     const {message} = req.body;
     
      const user = await prisma.user.findUnique({ where: { id: userId } });
@@ -24,7 +24,7 @@ export const makeRevision = async (req: Request, res: Response) => {
     }
 
     const currentProject = await prisma.websiteProject.findUnique({
-        where:{id:projectId,userId},
+        where:{id: projectId, userId},
         include: {versions: true}
     })
 
@@ -36,7 +36,7 @@ export const makeRevision = async (req: Request, res: Response) => {
         data:{
             role: 'user',
             content: message,
-            projectId
+            projectId: projectId
         }
     })
 
@@ -171,11 +171,11 @@ export const makeRevision = async (req: Request, res: Response) => {
 
 export const rollbackToVersion = async (req: Request, res: Response) => {
      try {
-        const userId = req.userId;
+        const userId = req.userId as string;
         if(!userId){
             return res.status(401).json({message:"Unauthorized"});
         }
-        const {projectId, versionId } = req.params;
+        const {projectId, versionId} = req.params as { projectId: string; versionId: string };
 
         const project = await prisma.websiteProject.findUnique({
             where: {id: projectId, userId},
@@ -192,7 +192,7 @@ export const rollbackToVersion = async (req: Request, res: Response) => {
        }
 
        await prisma.websiteProject.update({
-        where: {id: projectId,userId},
+        where: {id: projectId, userId},
         data:{
             current_code: version.code,
             current_version_index: version.id
@@ -203,7 +203,7 @@ export const rollbackToVersion = async (req: Request, res: Response) => {
         data:{
             role: 'assistant',
             content: "I've rolled back to selected version. You can now preview it",
-            projectId
+            projectId: projectId
         }
        })
        res.json({ message: 'version rolled back ' });
@@ -219,8 +219,8 @@ export const rollbackToVersion = async (req: Request, res: Response) => {
     //Controller Function to Delete a Project
     export const deleteProject = async (req: Request, res: Response) => {
      try {
-        const userId = req.userId;
-         const {projectId } = req.params;
+        const userId = req.userId as string;
+         const {projectId} = req.params as { projectId: string };
        
        
 
@@ -242,8 +242,8 @@ export const rollbackToVersion = async (req: Request, res: Response) => {
     // Controller for getting project code for preview
  export const getProjectPreview = async (req: Request, res: Response) => {
      try {
-        const userId = req.userId;
-         const {projectId } = req.params;
+        const userId = req.userId as string;
+         const {projectId} = req.params as { projectId: string };
        if(!userId){
         return res.status(401).json({message:"Unauthorized"});
        }
@@ -294,7 +294,7 @@ export const rollbackToVersion = async (req: Request, res: Response) => {
      export const getProjectById = async (req: Request, res: Response) => {
      try {
        
-        const {projectId } = req.params;
+        const {projectId} = req.params as { projectId: string };
        
 
        const project = await prisma.websiteProject.findFirst({
@@ -319,9 +319,9 @@ export const rollbackToVersion = async (req: Request, res: Response) => {
     // Controller to save project code
    export const saveProjectCode = async (req: Request, res: Response) => {
      try {
-       const userId = req.userId;
-        const {projectId } = req.params;
-        const {code } = req.body;
+       const userId = req.userId as string;
+        const {projectId} = req.params as { projectId: string };
+        const {code} = req.body;
        
         if(!userId){
             return res.status(401).json({message:"Unauthorized"});
