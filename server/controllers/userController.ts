@@ -297,3 +297,43 @@ export const togglePublish = async (req: Request, res: Response) => {
 export const purchaseCredits = async (req: Request, res: Response) => {
 
 };
+
+export const getUsersThumbnails = async (req: Request, res: Response)=>{
+  try {
+    const userId = req.userId;
+    
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized - no userId" });
+    }
+
+    const thumbnails = await prisma.thumbnail.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' }
+    })
+    res.json({thumbnails})
+  } catch (error: any) {
+    console.log("Error in getUsersThumbnails:", error);
+    res.status(500).json({message: error.message })
+  }
+}
+
+export const getThumbnailbyId = async (req: Request, res: Response)=>{
+  try {
+     const userId = req.userId as string;
+     
+     if (!userId) {
+      return res.status(401).json({ message: "Unauthorized - no userId" });
+     }
+     
+    const { id } = req.params as { id: string };
+
+    const thumbnail = await prisma.thumbnail.findFirst({
+      where: { userId: userId, id: id }
+    });
+    res.json({thumbnail})
+
+  } catch (error: any) {
+    console.log("Error in getThumbnailbyId:", error);
+    res.status(500).json({message: error.message })
+  }
+}

@@ -24,10 +24,11 @@ model User {
   emailVerified Boolean   @default(false)
   
   // Relations
-  projects WebsiteProject[]
-  sessions      Session[]
-  accounts      Account[]
+  projects   WebsiteProject[]
+  sessions   Session[]
+  accounts   Account[]
   transactions Transaction[]
+  thumbnails Thumbnail[]
 
   @@map("user")
 }
@@ -137,5 +138,28 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
+}
+
+model Thumbnail {
+  id             String   @id @default(uuid())
+  userId         String
+  title          String
+  description    String?
+  style          String
+  aspect_ratio   String   @default("16:9")
+  color_scheme   String?
+  text_overlay   Boolean  @default(false)
+  image_url      String   @default("")
+  prompt_used    String?
+  user_prompt    String?
+  isGenerating   Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("thumbnail")
 }
 
