@@ -73,7 +73,7 @@ const Sidebar = ({isMenuOpen , project, setProject, isGenerating, setIsGeneratin
         }
     },[project.conversation.length, isGenerating])
   return (
-    <div className={`h-full sm:max-w-sm rounded-xl bg-gray-900 border-gray-800 transition-all ${isMenuOpen ? 'max-sm:w-0 overflow-hidden' : 'w-full'}`}>
+    <div className={`h-full sm:max-w-sm rounded-xl glass-card border-white/10 transition-all ${isMenuOpen ? 'max-sm:w-0 overflow-hidden' : 'w-full'}`}>
         <div className='flex flex-col h-full'>
            {/* Messages container */}
            <div className='flex-1 overflow-y-auto no-scrollbar px-3 flex flex-col gap-4'>
@@ -87,11 +87,11 @@ const Sidebar = ({isMenuOpen , project, setProject, isGenerating, setIsGeneratin
                     return (
                         <div key={msg.id} className={`flex items-start gap-3 ${isUser ? 'justify-end' : 'justify-start'}`}>
                             {!isUser && (
-                                <div className='w-8 h-8 rounded-full bg-linear-to-br from-indigo-600 to-indigo-700 flex items-center justify-center'>
+                                <div className='w-8 h-8 rounded-full bg-linear-to-br from-emerald-600 to-teal-700 flex items-center justify-center'>
                                     <BotIcon className='size-5 text-white' />
                                 </div>
                             )}
-                            <div className={`max-w-[80%] p-2 px-4 rounded-2xl shadow-sm text-sm mt-5 leading-relaxed ${isUser ? "bg-linear-to-br from-indigo-500 to-indigo-600 text-white rounded-tr-none" : " rounded-tl-none bg-gray-800 text-gray-100"}`}>
+                            <div className={`max-w-[80%] p-2 px-4 rounded-2xl shadow-sm text-sm mt-5 leading-relaxed ${isUser ? "bg-linear-to-br from-emerald-500 to-teal-600 text-white rounded-tr-none" : " rounded-tl-none bg-gray-800 text-gray-100"}`}>
                                 {msg.content}
                             </div>
                             {isUser && (
@@ -116,7 +116,7 @@ const Sidebar = ({isMenuOpen , project, setProject, isGenerating, setIsGeneratin
                                 {project.current_version_index === ver.id ? (
                                     <button className='px-3 py-1 rounded-md text-xs bg-gray-700'>Current version</button>
                                 ): (
-                                    <button onClick={()=> handleRollback(ver.id)} className='px-3 py-1 rounded-md text-xs bg-indigo-500 hover:bg-indigo-600 text-white'>Roll back to this version</button>
+                                    <button onClick={()=> handleRollback(ver.id)} className='px-3 py-1 rounded-md text-xs bg-emerald-500 hover:bg-emerald-600 text-white'>Roll back to this version</button>
                                 )}
                                 <Link target='_blank' to={`/projects/${project.id}/${ver.id}`}>
                                 <EyeIcon className='size-6 p-1 bg-gray-700 hover:bg-indigo-500 transition-colors rounded' />
@@ -132,7 +132,7 @@ const Sidebar = ({isMenuOpen , project, setProject, isGenerating, setIsGeneratin
             {
                 isGenerating && (
                     <div className='flex items-start gap-3 justify-start'>
-                        <div className='w-8 h-8 rounded-full bg-linear-to-br from-indigo-600 to-indigo-700 flex items-center justify-center'>
+                        <div className='w-8 h-8 rounded-full bg-linear-to-br from-emerald-600 to-teal-700 flex items-center justify-center'>
                           <BotIcon className='size-5 text-white' />
                         </div>
                         {/* three dot loader */}
@@ -153,8 +153,8 @@ const Sidebar = ({isMenuOpen , project, setProject, isGenerating, setIsGeneratin
            <form onSubmit={handleRevision} className='m-3 relative'>
                 <div className='flex items-center gap-2'>
                     <textarea onChange={(e)=> setInput(e.target.value)}
-                    value={input} rows={4} placeholder='Type a Message' className='flex-1 p-3 rounded-xl resize-none text-sm outline-none ring ring-gray-700 focus:ring-indigo-500 bg-gray-800 text-gray-100 placeholder-gray-400 transition-all' disabled={isGenerating}/>
-                    <button disabled={isGenerating || !input.trim()} className='absolute bottom-2.5 right-2.5 rounded-full bg-linear-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-7-- text-white transition-colors disabled:opacity-60'>
+                    value={input} rows={4} placeholder='Type a Message' className='flex-1 p-3 rounded-xl resize-none text-sm outline-none ring ring-gray-700 focus:ring-emerald-500 bg-gray-800 text-gray-100 placeholder-gray-400 transition-all' disabled={isGenerating}/>
+                    <button disabled={isGenerating || !input.trim()} className='absolute bottom-2.5 right-2.5 rounded-full bg-linear-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white transition-colors disabled:opacity-60'>
                         {isGenerating ? <Loader2Icon className='size-7 p-1.5 animate-spin text-white' /> : <SendIcon className='size-7 p-1.5 text-white'/>}
                     </button>
                 </div>

@@ -1,41 +1,22 @@
 import { Request, Response } from "express";
 import prisma from "../lib/prisma.js";
-import openai from "../configs/openai.js";
+import ai from "../configs/ai.js";
 
-// Get User Credits
-export const getUserCredits = async (req: Request, res: Response) => {
-  try {
-    const userId = req.userId;
-    if (!userId) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
-    const user = await prisma.user.findUnique({ where: { id: userId } });
-    return res.status(200).json({ credits: user?.credits });
-  } catch (error: any) {
-    console.log(error.code || error.message);
-    return res.status(500).json({ message: error.message });
-  }
-};
 
-// Create new Project
+// ==============================
+// CREATE PROJECT (NON-BLOCKING)
+// ==============================
 export const createUserProject = async (req: Request, res: Response) => {
-    const userId = req.userId;
+  const userId = req.userId;
+
   try {
     const { initial_prompt } = req.body;
 
     if (!userId) {
       return res.status(401).json({ message: "Unauthorized" });
     }
-    const user = await prisma.user.findUnique({ where: { id: userId } });
 
-    // to be removed later
-    if (user && user.credits < 5) {
-      return res
-        .status(403)
-        .json({ message: "add credits to create new project" });
-    }
-
-    // create project
+    // 1️⃣ Create project
     const project = await prisma.websiteProject.create({
       data: {
         name:
@@ -47,12 +28,7 @@ export const createUserProject = async (req: Request, res: Response) => {
       },
     });
 
-    // Update user creations
-    await prisma.user.update({
-      where: { id: userId },
-      data: { totalCreation: { increment: 1 } },
-    });
-
+    // 2️⃣ Save user message
     await prisma.conversation.create({
       data: {
         role: "user",
@@ -61,154 +37,157 @@ export const createUserProject = async (req: Request, res: Response) => {
       },
     });
 
-    // to be deleted later
+    // 3️⃣ Update stats
     await prisma.user.update({
       where: { id: userId },
       data: {
-        credits: { decrement: 5 },
+        totalCreation: { increment: 1 },
       },
     });
 
-    res.json({ projectId: project.id });
+    // ✅ Respond immediately (IMPORTANT)
+    res.status(200).json({ projectId: project.id });
 
-    // Enhance user prompt
-    const promptEnhanceResponse = await openai.chat.completions.create({
-      model: "kwaipilot/kat-coder-pro::free",
-      messages: [
-        {
-          role: "system",
-          content: `
-You are a prompt enhancement specialist. Take the user's website request and expand it into a detailed, comprehensive prompt that will help create the best possible website.
+    // ==============================
+    // 🧠 BACKGROUND AI PIPELINE
+    // ==============================
+    (async () => {
+      try {
+        console.log("🚀 AI START:", project.id);
 
-    Enhance this prompt by:
-    1. Adding specific design details (layout, color scheme, typography)
-    2. Specifying key sections and features
-    3. Describing the user experience and interactions
-    4. Including modern web design best practices
-    5. Mentioning responsive design requirements
-    6. Adding any missing but important elements
+        // STEP 1 — Enhance prompt
+        const enhanceRes = await ai.models.generateContent({
+          model: "gemini-3-pro-preview",
+          contents: [
+            {
+              role: "user",
+              parts: [
+                {
+                  text: `You are a prompt enhancement expert.
+Make the user's request detailed, clear and developer-friendly.
+Return ONLY the enhanced prompt.
 
-Return ONLY the enhanced prompt, nothing else. Make it detailed but concise (2-3 paragraphs max).
-`,
-        },
-        {
-          role: "user",
-          content: initial_prompt,
-        },
-      ],
-    });
+User request: "${initial_prompt}"`
+                }
+              ]
+            }
+          ]
+        });
 
-    const enhancedPrompt = promptEnhanceResponse.choices[0].message.content;
-    await prisma.conversation.create({
-      data: {
-        role: "assistant",
-        content: `I have enhanced your prompt to ${enhancedPrompt}`,
-        projectId: project.id,
-      },
-    });
-    await prisma.conversation.create({
-      data: {
-        role: "assistant",
-        content: `now generating your website ...`,
-        projectId: project.id,
-      },
-    });
+        const enhancedPrompt =
+          enhanceRes.candidates?.[0]?.content?.parts?.[0]?.text || initial_prompt;
 
-    // Generate website code
-    const codeGenerationResponse = await openai.chat.completions.create({
-      model: "kwaipilot/kat-coder-pro::free",
-      messages: [
-        {
-          role: "system",
-          content: `You are an expert web developer. Create a complete, production-ready, single-page website based on this request: "${enhancedPrompt}"
-
-    CRITICAL REQUIREMENTS:
-    - You MUST output valid HTML ONLY. 
-    - Use Tailwind CSS for ALL styling
-    - Include this EXACT script in the <head>: <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    - Use Tailwind utility classes extensively for styling, animations, and responsiveness
-    - Make it fully functional and interactive with JavaScript in <script> tag before closing </body>
-    - Use modern, beautiful design with great UX using Tailwind classes
-    - Make it responsive using Tailwind responsive classes (sm:, md:, lg:, xl:)
-    - Use Tailwind animations and transitions (animate-*, transition-*)
-    - Include all necessary meta tags
-    - Use Google Fonts CDN if needed for custom fonts
-    - Use placeholder images from https://placehold.co/600x400
-    - Use Tailwind gradient classes for beautiful backgrounds
-    - Make sure all buttons, cards, and components use Tailwind styling
-
-    CRITICAL HARD RULES:
-    1. You MUST put ALL output ONLY into message.content.
-    2. You MUST NOT place anything in "reasoning", "analysis", "reasoning_details", or any hidden fields.
-    3. You MUST NOT include internal thoughts, explanations, analysis, comments, or markdown.
-    4. Do NOT include markdown, explanations, notes, or code fences.
-
-    The HTML should be complete and ready to render as-is with Tailwind CSS.
-`,
-        },
-        {
-          role: "user",
-          content: enhancedPrompt || "",
-        },
-      ],
-    });
-
-    const code = codeGenerationResponse.choices[0].message.content || "";
-
-    if(!code){
         await prisma.conversation.create({
+          data: {
+            role: "assistant",
+            content: `Enhanced prompt: ${enhancedPrompt}`,
+            projectId: project.id,
+          },
+        });
+
+        await prisma.conversation.create({
+          data: {
+            role: "assistant",
+            content: "Generating your website...",
+            projectId: project.id,
+          },
+        });
+
+        console.log("⚡ Generating code...");
+
+        // STEP 2 — Generate code
+        const codeRes = await ai.models.generateContent({
+          model: "gemini-3-pro-preview",
+          contents: [
+            {
+              role: "user",
+              parts: [
+                {
+                  text: `Return ONLY valid HTML.
+Use Tailwind CSS for ALL styling.
+Include <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script> in head.
+No explanations, no markdown, no code fences.
+
+Request: "${enhancedPrompt}"`
+                }
+              ]
+            }
+          ]
+        });
+
+        const code =
+          codeRes.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
+
+        if (!code) {
+          await prisma.conversation.create({
             data: {
-                role:'assistant',
-                content: "Unable to generate code , please try again",
-                projectId:project.id
-            }
-        })
-        await prisma.user.update({
-            where: {id:userId},
-            data:{
-                credits : {increment:5}
-            }
-        })
-        return;
-    }
+              role: "assistant",
+              content: "Failed to generate website. Try again.",
+              projectId: project.id,
+            },
+          });
 
-    // Create Version of the Project
-    const version = await prisma.version.create({
-        data: {
-            code: code.replace(/```[a-z]*\n?/gi,'').replace(/```$/g,'').trim(),
-            description: 'Initial Version',
-            projectId: project.id
+          return;
         }
-    })
 
-    await prisma.conversation.create({
-        data:{
-            role:'assistant',
-            content:"I have created your website",
-            projectId: project.id
-        }
-    })
+        const cleanCode = code
+          .replace(/```[a-z]*\n?/gi, "")
+          .replace(/```$/g, "")
+          .trim();
 
-    await prisma.websiteProject.update({
-        where:{ id : project.id },
-        data:{
-            current_code: code.replace(/```[a-z]*\n?/gi,'').replace(/```$/g,'').trim(),
-            current_version_index:version.id
-        }
-    })
+        // STEP 3 — Save version
+        const version = await prisma.version.create({
+          data: {
+            code: cleanCode,
+            description: "Initial Version",
+            projectId: project.id,
+          },
+        });
+
+        // STEP 4 — Update project
+        await prisma.websiteProject.update({
+          where: { id: project.id },
+          data: {
+            current_code: cleanCode,
+            current_version_index: version.id,
+          },
+        });
+
+        // STEP 5 — Final message
+        await prisma.conversation.create({
+          data: {
+            role: "assistant",
+            content: "Website created successfully 🚀",
+            projectId: project.id,
+          },
+        });
+
+        console.log("✅ AI DONE:", project.id);
+
+      } catch (err) {
+        console.error("🔥 AI ERROR:", err);
+
+        await prisma.conversation.create({
+          data: {
+            role: "assistant",
+            content: "Something went wrong while generating your website.",
+            projectId: project.id,
+          },
+        });
+      }
+    })();
 
   } catch (error: any) {
-    // to be removed later
-    await prisma.user.update({
-        where:{id : userId},
-        data:{credits:{increment:1}}
-    })
-    console.log(error.code || error.message);
+    console.error(error);
+
     return res.status(500).json({ message: error.message });
   }
 };
 
-// to get a single user project
+
+// ==============================
+// GET SINGLE PROJECT
+// ==============================
 export const getUserProject = async (req: Request, res: Response) => {
   try {
     const userId = req.userId;
@@ -217,27 +196,28 @@ export const getUserProject = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const {projectId} = req.params as { projectId: string }
+    const { projectId } = req.params as { projectId: string };
 
     const project = await prisma.websiteProject.findUnique({
-        where : {id: projectId , userId},
-        include:{
-            conversation:{
-                orderBy:{timestamp:'asc'}
-            },
-            versions:{
-                orderBy:{timestamp:'asc'}
-            }
-        }
-    })
-    res.json({project})
+      where: { id: projectId, userId },
+      include: {
+        conversation: { orderBy: { timestamp: "asc" } },
+        versions: { orderBy: { timestamp: "asc" } },
+      },
+    });
+
+    return res.status(200).json({ project });
+
   } catch (error: any) {
-    console.log(error.code || error.message);
+    console.error(error);
     return res.status(500).json({ message: error.message });
   }
 };
 
-// To get all user projects
+
+// ==============================
+// GET ALL PROJECTS
+// ==============================
 export const getUserProjects = async (req: Request, res: Response) => {
   try {
     const userId = req.userId;
@@ -247,16 +227,17 @@ export const getUserProjects = async (req: Request, res: Response) => {
     }
 
     const projects = await prisma.websiteProject.findMany({
-        where : {id: userId},
-        orderBy:{updatedAt:'desc'}
-    })
-    res.json({projects})
+      where: { userId },
+      orderBy: { updatedAt: "desc" },
+    });
+
+    return res.status(200).json({ projects });
+
   } catch (error: any) {
-    console.log(error.code || error.message);
+    console.error(error);
     return res.status(500).json({ message: error.message });
   }
 };
-
 
 // to toggle Project Publish
 export const togglePublish = async (req: Request, res: Response) => {
@@ -286,17 +267,15 @@ export const togglePublish = async (req: Request, res: Response) => {
         }
 
     })
-    res.json({message : !project.isPublished ? 'Project Published Successfully' : 'Project Unpublished'})
+    return res.status(200).json({message : !project.isPublished ? 'Project Published Successfully' : 'Project Unpublished'})
   } catch (error: any) {
     console.log(error.code || error.message);
     return res.status(500).json({ message: error.message });
   }
 };
 
-// Purchase credits
-export const purchaseCredits = async (req: Request, res: Response) => {
 
-};
+
 
 export const getUsersThumbnails = async (req: Request, res: Response)=>{
   try {
@@ -310,10 +289,10 @@ export const getUsersThumbnails = async (req: Request, res: Response)=>{
       where: { userId },
       orderBy: { createdAt: 'desc' }
     })
-    res.json({thumbnails})
+    return res.status(200).json({thumbnails})
   } catch (error: any) {
     console.log("Error in getUsersThumbnails:", error);
-    res.status(500).json({message: error.message })
+    return res.status(500).json({message: error.message })
   }
 }
 
@@ -330,10 +309,45 @@ export const getThumbnailbyId = async (req: Request, res: Response)=>{
     const thumbnail = await prisma.thumbnail.findFirst({
       where: { userId: userId, id: id }
     });
-    res.json({thumbnail})
+    return res.status(200).json({thumbnail})
 
   } catch (error: any) {
     console.log("Error in getThumbnailbyId:", error);
-    res.status(500).json({message: error.message })
+    return res.status(500).json({message: error.message })
   }
 }
+
+// ==============================
+// CHECK PROJECT STATUS (for polling)
+// ==============================
+export const checkProjectStatus = async (req: Request, res: Response) => {
+  try {
+    const userId = req.userId;
+    const { projectId } = req.params;
+
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const project = await prisma.websiteProject.findUnique({
+      where: { id: projectId as string, userId: userId as string },
+      select: { current_code: true, current_version_index: true }
+    });
+
+    if (!project) {
+      return res.status(404).json({ message: "Project not found" });
+    }
+
+    const isGenerated = !!project.current_code && project.current_version_index !== "";
+
+    return res.status(200).json({
+      projectId,
+      isGenerated,
+      hasCode: !!project.current_code
+    });
+
+  } catch (error: any) {
+    console.error(error);
+    return res.status(500).json({ message: error.message });
+  }
+};

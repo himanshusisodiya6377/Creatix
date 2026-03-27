@@ -90,19 +90,33 @@ const Projects = () => {
       toast("Please Login to View")
     }
   },[session?.user])
+  
+  // Polling for project generation status
   useEffect(()=> {
     if(project && !project.current_code){
-      const intervalId = setInterval(fetchProject,10000);
-      return ()=>clearInterval(intervalId)
+      const pollStatus = async () => {
+        try {
+          const { data } = await api.get(`/api/user/project/status/${projectId}`);
+          if (data.isGenerated) {
+            // Fetch full project when generation is done
+            fetchProject();
+            setIsGenerating(false);
+          }
+        } catch (error) {
+          console.log('Poll error:', error);
+        }
+      };
+      
+      const intervalId = setInterval(pollStatus, 3000); // Poll every 3 seconds
+      return () => clearInterval(intervalId);
     }
-    fetchProject()
-  },[project])
+  },[project, projectId])
   
   if(loading){
     return(
       <>  
       <div className='flex items-center justify-center h-screen'>
-        <Loader2Icon className='size-7 animate-spin text-violet-200' />
+        <Loader2Icon className='size-7 animate-spin text-emerald-300' />
 
       </div>
       </>
@@ -143,10 +157,10 @@ const Projects = () => {
             <Link target='_blank' to={`/preview/${projectId}`} className='flex items-center gap-2 px-4 py-1 rounded sm:rounded-sm border border-gray-700 hover:border-gray-500 transition-colors'> 
              <FullscreenIcon size={16} /> Preview
             </Link>
-            <button onClick={downloadCode} className='bg-linear-to-br from-blue-700 to-blue-600 hover:from-blue-600 hover:to-blue-500 text-white px-3.5 py-1 flex items-center gap-2 rounded sm:rounded-sm transition-colors'>
+            <button onClick={downloadCode} className='bg-linear-to-br from-teal-700 to-teal-600 hover:from-teal-600 hover:to-teal-500 text-white px-3.5 py-1 flex items-center gap-2 rounded sm:rounded-sm transition-colors'>
               <ArrowBigDownDashIcon size={16} /> Download
             </button>
-            <button onClick={togglePublish} className='bg-linear-to-br from-indigo-700 to-indigo-600 hover:from-indigo-600 hover:to-indigo-500 text-white px-3.5 py-1 flex items-center gap-2 rounded sm:rounded-sm transition-colors'>
+            <button onClick={togglePublish} className='bg-linear-to-br from-emerald-700 to-emerald-600 hover:from-emerald-600 hover:to-emerald-500 text-white px-3.5 py-1 flex items-center gap-2 rounded sm:rounded-sm transition-colors'>
               {project.isPublished ?
               <EyeOffIcon size={16} /> : <EyeIcon size={16} />
               }

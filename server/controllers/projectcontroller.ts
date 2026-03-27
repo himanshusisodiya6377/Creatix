@@ -1,6 +1,6 @@
 import {Request,Response} from 'express';
 import prisma from "../lib/prisma.js";
-import openai from "../configs/openai.js";
+import ai from "../configs/ai.js";
 
 
 // Controller Function to make Revision
@@ -14,9 +14,6 @@ export const makeRevision = async (req: Request, res: Response) => {
      const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!userId || !user) {
       return res.status(401).json({ message: "Unauthorized" });
-    }
-    if(user.credits < 5){
-        return res.status(403).json({ message: "add more credits to make changes" });
     }
 
     if(!message || message.trim() == "" ){
@@ -40,37 +37,33 @@ export const makeRevision = async (req: Request, res: Response) => {
         }
     })
 
-    await prisma.user.update({
-        where: {id: userId},
-        data: { credits: {decrement: 5} }
-    })
 
     //Enhance user prompt
-    const promptEnhanceResponse = await openai.chat.completions.create({
-        model: 'kwaipilot/kat-coder-pro::free',
-        messages: [
-            {
-                role: 'system',
-                content: `
-                You are a prompt enhancement specialist. The user wants to make changes to their website. Enhance their request to be more specific and actionable for a web developer.
-
-                Enhance this by:
-                1. Being specific about what elements to change.
-                2. mentioning design details (colors, spacing, sizes)
-                3. Clarifying the desired outcome.
-                4. Using clear technical terms
-
-                return ONLY the enhance request, noting else. Keep it concise (1-2 sentences).`
-            },
+    const promptEnhanceResponse = await ai.models.generateContent({
+        model: 'gemini-3-pro-preview',
+        contents: [
             {
                 role: 'user',
-                content: `User's request: "${message}"`
+                parts: [
+                  {
+                    text: `You are a prompt enhancement specialist. The user wants to make changes to their website. Enhance their request to be more specific and actionable for a web developer.
 
+Enhance this by:
+1. Being specific about what elements to change.
+2. Mentioning design details (colors, spacing, sizes)
+3. Clarifying the desired outcome.
+4. Using clear technical terms
+
+Return ONLY the enhanced request, nothing else. Keep it concise (1-2 sentences).
+
+User's request: "${message}"`
+                  }
+                ]
             }
         ]
     })
 
-    const enhancedPrompt = promptEnhanceResponse.choices[0].message.content;
+    const enhancedPrompt = promptEnhanceResponse.candidates?.[0]?.content?.parts?.[0]?.text;
 
     await prisma.conversation.create({
         data: {
@@ -88,33 +81,35 @@ export const makeRevision = async (req: Request, res: Response) => {
     })
 
     // Generate website code
-    const codegenerationresponse = await openai.chat.completions.create({
-        model: 'kwaipilot/kat-coder-pro::free',
-        messages: [
+    const codegenerationresponse = await ai.models.generateContent({
+        model: 'gemini-3-pro-preview',
+        contents: [
             {
-                role: 'system',
-                content: `
-                You are an expert web developer.
-                
-                CRITICAL REQUIREMENTS:
-                - Return ONLY the complete updated HTML code with therequested changes.
-                - Use Tailwind CSS for ALL styling (NO custom CSS).
-                - Use tailwind utilit classes for all styling changes.
-                - include all javaScript in <script> tags before closing </body> 
-                - Make sure it's a complete, standalone HTML document with Tailwind CSS.
-                - Return the HTML Code Only, nothing else.
-                
-                Apply the requested changes while maintaining the Tailwind CSS styling approach.`
-            },
-            {
-                 role: 'user',
-                content: `
-                here is the current website code: "${currentProject.current_code}" the user wants this change: "${enhancedPrompt}" `
+                role: 'user',
+                parts: [
+                  {
+                    text: `You are an expert web developer.
+
+CRITICAL REQUIREMENTS:
+- Return ONLY the complete updated HTML code with the requested changes.
+- Use Tailwind CSS for ALL styling (NO custom CSS).
+- Use tailwind utility classes for all styling changes.
+- Include the Tailwind script: <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script> in head.
+- Include all JavaScript in <script> tags before closing </body>
+- Make sure it's a complete, standalone HTML document with Tailwind CSS.
+- Return the HTML Code Only, nothing else. No explanations or code fences.
+
+Current website code:
+${currentProject.current_code}
+
+Requested change: "${enhancedPrompt}"`
+                  }
+                ]
             }
         ]
     })
 
-    const code = codegenerationresponse.choices[0].message.content || '';
+    const code = codegenerationresponse.candidates?.[0]?.content?.parts?.[0]?.text || '';
     if(!code){
         await prisma.conversation.create({
             data: {
@@ -123,13 +118,9 @@ export const makeRevision = async (req: Request, res: Response) => {
                 projectId
             }
         })
-        await prisma.user.update({
-            where: {id:userId},
-            data:{
-                credits : {increment:5}
-            }
-        })
-        return;
+        return res.status(500).json({
+    message: "Unable to generate code, please try again"
+});
     }
     const version = await prisma.version.create({
         data:{
@@ -156,12 +147,8 @@ export const makeRevision = async (req: Request, res: Response) => {
     })
     
 
-    return res.json({ message: "Changes made successfully" });
+    return res.status(200).json({ message: "Changes made successfully" });
   } catch (error: any) {
-     await prisma.user.update({
-        where: {id: userId},
-        data: { credits: {increment: 5} }
-    })
     console.log(error.code || error.message);
     return res.status(500).json({ message: error.message });
   }
@@ -206,7 +193,7 @@ export const rollbackToVersion = async (req: Request, res: Response) => {
             projectId: projectId
         }
        })
-       res.json({ message: 'version rolled back ' });
+       return res.status(200).json({ message: 'version rolled back ' });
 
      } catch (error: any) {
         console.log(error.code || error.message);
@@ -258,7 +245,7 @@ export const rollbackToVersion = async (req: Request, res: Response) => {
         return res.status(404).json({message:"Project not found"});
        }
 
-       res.json({project });
+       return res.status(200).json({project });
 
      } catch (error: any) {
         console.log(error.code || error.message);
@@ -280,7 +267,7 @@ export const rollbackToVersion = async (req: Request, res: Response) => {
        })
 
 
-       res.json({projects });
+       return res.status(200).json({projects });
 
      } catch (error: any) {
         console.log(error.code || error.message);
@@ -306,7 +293,7 @@ export const rollbackToVersion = async (req: Request, res: Response) => {
         return res.status(404).json({message:"Project not found"});
        }
 
-       res.json({code: project.current_code }); 
+       return res.status(200).json({code: project.current_code }); 
 
      } catch (error: any) {
         console.log(error.code || error.message);
@@ -347,7 +334,7 @@ export const rollbackToVersion = async (req: Request, res: Response) => {
            })
 
        
-       res.json({message: 'Project saved successfully' }); 
+        return res.status(200).json({message: 'Project saved successfully' }); 
 
      } catch (error: any) {
         console.log(error.code || error.message);
