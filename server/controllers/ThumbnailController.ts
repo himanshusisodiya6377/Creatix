@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import prisma from '../lib/prisma.js';
-import { GenerateContentConfig, HarmBlockThreshold, HarmCategory } from '@google/genai';
-import ai from '../configs/ai.js';
+import { generateImageWithClipdrop } from '../configs/clipdrop.js';
 import path from 'node:path';
 import fs from 'fs';
 import {v2 as cloudinary} from 'cloudinary';
@@ -28,36 +27,13 @@ const colorSchemeDescriptions = {
 // Background function to generate and upload the thumbnail
 const generateThumbnailAsync = async (thumbnailId: string, userId: string, title: string, user_prompt: string, style: string, aspect_ratio: string, color_scheme: string) => {
   try {
-    const model = 'gemini-3-pro-image-preview';
+    console.log(`\n📋 Building prompt for thumbnail:`);
+    console.log(`  📌 Style: ${style}`);
+    console.log(`  🎨 Color Scheme: ${color_scheme}`);
+    console.log(`  📐 Aspect Ratio: ${aspect_ratio}`);
+    console.log(`  💬 Title: ${title}`);
 
-    const generationConfig: GenerateContentConfig = {
-      maxOutputTokens: 32768,
-      temperature: 1,
-      topP: 0.95,
-      responseModalities: ['IMAGE'],
-      imageConfig: {
-        aspectRatio: aspect_ratio || '16:9',
-        imageSize: '1K'
-      },
-      safetySettings: [{
-        category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-        threshold: HarmBlockThreshold.OFF
-      },
-      {
-        category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-        threshold: HarmBlockThreshold.OFF
-      },
-      {
-        category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-        threshold: HarmBlockThreshold.OFF
-      },
-      {
-        category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-        threshold: HarmBlockThreshold.OFF
-      },]
-    }
-
-    let prompt = `Create a ${stylePrompts[style as keyof typeof stylePrompts]} for: "${title}"`;
+    let prompt = `Create a ${stylePrompts[style as keyof typeof stylePrompts]} thumbnail for: "${title}"`;
 
     if(color_scheme){
       prompt += ` Use a ${colorSchemeDescriptions[color_scheme as keyof typeof colorSchemeDescriptions]} color scheme.`;
@@ -67,32 +43,37 @@ const generateThumbnailAsync = async (thumbnailId: string, userId: string, title
       prompt += ` Additional details: ${user_prompt}.`;
     }
 
+    // Add clear text rendering instruction with emphasis on accuracy
+    prompt += ` CRITICAL: Display the exact text "${title}" prominently on the thumbnail in large, bold, highly readable letters.`;
+    prompt += ` TEXT MUST BE SPELLED CORRECTLY AND MATCH EXACTLY: "${title}". The text should have high contrast with the background for maximum readability.`;
     prompt += ` The thumbnail should be ${aspect_ratio}, visually stunning, and designed to maximize click-through rate. Make it bold, professional, and impossible to ignore.`;
+    
+    console.log(`\n✅ Final Prompt:\n${prompt}\n`);
 
-    // Generate the image using the ai model
-    const response: any = await ai.models.generateContent({
-      model,
-      contents: [prompt],
-      config: generationConfig
-    })
+    // Define exact dimensions for each aspect ratio to avoid stretching
+    const dimensionMap: Record<string, { width: number; height: number }> = {
+      '16:9': { width: 1024, height: 576 },
+      '1:1': { width: 1024, height: 1024 },
+      '9:16': { width: 576, height: 1024 },
+      '4:3': { width: 1024, height: 768 },
+      '3:4': { width: 768, height: 1024 },
+    };
 
-    // Check if the response is valid
-    if(!response?.candidates?.[0]?.content?.parts){
-      throw new Error('Unexpected response from Gemini API')
-    }
+    const dimensions = dimensionMap[aspect_ratio] || dimensionMap['16:9'];
+    const { width, height } = dimensions;
 
-    const parts = response.candidates[0].content.parts;
+    console.log(`🎨 Generating thumbnail with Clipdrop...`);
+    console.log(`  📐 Dimensions: ${width}x${height} (Aspect Ratio: ${aspect_ratio})`);
+    
+    // Generate the image using Clipdrop
+    const imageBuffer = await generateImageWithClipdrop({
+      prompt,
+      width,
+      height,
+    });
 
-    let finalBuffer: Buffer | null = null;
-
-    for(const part of parts){
-      if(part.inlineData){
-        finalBuffer = Buffer.from(part.inlineData.data, 'base64')
-      }
-    }
-
-    if(!finalBuffer){
-      throw new Error('No image data received from Gemini API')
+    if(!imageBuffer){
+      throw new Error('No image data received from Clipdrop');
     }
 
     const filename = `final-output-${Date.now()}.png`;
@@ -102,7 +83,7 @@ const generateThumbnailAsync = async (thumbnailId: string, userId: string, title
     fs.mkdirSync('images', {recursive: true})
 
     // Write the final image to the file
-    fs.writeFileSync(filePath, finalBuffer);
+    fs.writeFileSync(filePath, imageBuffer);
 
     const uploadResult = await cloudinary.uploader.upload(filePath, {resource_type:'image'})
 
@@ -120,14 +101,11 @@ const generateThumbnailAsync = async (thumbnailId: string, userId: string, title
     console.log(`✅ Thumbnail ${thumbnailId} generated successfully`)
   } catch (error) {
     console.error(`❌ Error generating thumbnail ${thumbnailId}:`, error);
-    // Mark the thumbnail as failed
-    await prisma.thumbnail.update({
-      where: { id: thumbnailId },
-      data: {
-        isGenerating: false,
-        image_url: 'ERROR'
-      }
+    // Delete the thumbnail record if generation failed (only save successful ones)
+    await prisma.thumbnail.deleteMany({
+      where: { id: thumbnailId }
     });
+    console.log(`🗑️ Deleted failed thumbnail ${thumbnailId}`);
   }
 }
 
