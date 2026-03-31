@@ -57,7 +57,7 @@ export const createUserProject = async (req: Request, res: Response) => {
 
         // STEP 1 — Enhance prompt
         const enhanceRes = await ai.models.generateContent({
-          model: "gemini-3-pro-preview",
+          model: "gemini-2.5-flash",
           contents: [
             {
               role: "user",
@@ -97,7 +97,7 @@ User request: "${initial_prompt}"`
 
         // STEP 2 — Generate code
         const codeRes = await ai.models.generateContent({
-          model: "gemini-3-pro-preview",
+          model: "gemini-2.5-flash",
           contents: [
             {
               role: "user",

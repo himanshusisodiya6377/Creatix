@@ -58,7 +58,7 @@ const ProjectPreview = forwardRef<ProjectPreviewRef,ProjectPreviewProps>(({proje
       if(event.data.type === 'ELEMENT_SELECTED'){
         setSelectedElement(event.data.payload);
       }
-      else if(event.data.tpe == "CLEAR_SELECTION"){
+      else if(event.data.type == "CLEAR_SELECTION"){
         setSelectedElement(null);
       }
     }

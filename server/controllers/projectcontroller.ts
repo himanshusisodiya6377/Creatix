@@ -40,7 +40,7 @@ export const makeRevision = async (req: Request, res: Response) => {
 
     //Enhance user prompt
     const promptEnhanceResponse = await ai.models.generateContent({
-        model: 'gemini-3-pro-preview',
+        model: 'gemini-2.5-flash',
         contents: [
             {
                 role: 'user',
@@ -82,7 +82,7 @@ User's request: "${message}"`
 
     // Generate website code
     const codegenerationresponse = await ai.models.generateContent({
-        model: 'gemini-3-pro-preview',
+        model: 'gemini-2.5-flash',
         contents: [
             {
                 role: 'user',
