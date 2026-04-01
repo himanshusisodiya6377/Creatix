@@ -1,6 +1,6 @@
 import api from '@/configs/axios';
 import { authClient } from '@/lib/auth-client';
-import { Loader2Icon, Globe, ImageIcon, SparklesIcon, ArrowRightIcon, CodeIcon, ZapIcon } from 'lucide-react';
+import { Loader2Icon, Globe, ImageIcon, SparklesIcon, ArrowRightIcon, CodeIcon, ZapIcon, Figma, Square, Camera, ShoppingCart, MessageSquare, Zap, Eye, Smartphone, Lock, Cpu, GitBranch, Users, Palette } from 'lucide-react';
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -189,14 +189,145 @@ const Home = () => {
         </div>
       </div>
 
+      {/* How It Works Section */}
+      <div className="mt-24 w-full max-w-5xl">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-bold text-white mb-4">How It Works</h2>
+          <p className="text-gray-400 text-base max-w-2xl mx-auto">
+            Transform your ideas into reality in just 3 simple steps
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Step 1 */}
+          <div className="relative group">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center mb-4 shadow-lg shadow-blue-900/40 group-hover:scale-110 transition-transform duration-300 relative z-10">
+                <MessageSquare className="size-8 text-white" />
+              </div>
+              <div className="absolute left-1/2 top-8 w-1/2 h-1 bg-gradient-to-r from-transparent to-blue-500/30 -ml-1/4 hidden md:block" />
+              <h3 className="text-lg font-semibold text-white mb-2">1. Describe</h3>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                Tell us what you want to build. Be specific about your vision and requirements.
+              </p>
+            </div>
+          </div>
+
+          {/* Step 2 */}
+          <div className="relative group">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center mb-4 shadow-lg shadow-purple-900/40 group-hover:scale-110 transition-transform duration-300 relative z-10">
+                <Zap className="size-8 text-white" />
+              </div>
+              <div className="absolute left-1/2 top-8 w-1/2 h-1 bg-gradient-to-r from-purple-500/30 to-transparent -ml-1/2 hidden md:block" />
+              <h3 className="text-lg font-semibold text-white mb-2">2. AI Magic</h3>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                Our AI analyzes your request and generates custom code instantly.
+              </p>
+            </div>
+          </div>
+
+          {/* Step 3 */}
+          <div className="relative group">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center mb-4 shadow-lg shadow-emerald-900/40 group-hover:scale-110 transition-transform duration-300 relative z-10">
+                <Eye className="size-8 text-white" />
+              </div>
+              <h3 className="text-lg font-semibold text-white mb-2">3. Preview & Edit</h3>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                See your creation instantly. Make edits and refine until it's perfect.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Features Grid Section */}
+      <div className="mt-24 w-full max-w-5xl">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-bold text-white mb-4">Powerful Features</h2>
+          <p className="text-gray-400 text-base max-w-2xl mx-auto">
+            Everything you need to create stunning websites and thumbnails
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Feature 1 - AI-Powered */}
+          <div className="p-6 rounded-xl bg-white/5 border border-white/10 hover:border-emerald-500/40 hover:bg-white/8 transition-all duration-300 group">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center mb-4 shadow-lg shadow-blue-900/40 group-hover:scale-110 transition-transform duration-300">
+              <Cpu className="size-5 text-white" />
+            </div>
+            <h3 className="text-lg font-semibold text-white mb-2">AI-Powered</h3>
+            <p className="text-gray-400 text-sm">Advanced AI generates complete websites from simple text descriptions.</p>
+          </div>
+
+          {/* Feature 2 - Responsive Design */}
+          <div className="p-6 rounded-xl bg-white/5 border border-white/10 hover:border-emerald-500/40 hover:bg-white/8 transition-all duration-300 group">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center mb-4 shadow-lg shadow-purple-900/40 group-hover:scale-110 transition-transform duration-300">
+              <Smartphone className="size-5 text-white" />
+            </div>
+            <h3 className="text-lg font-semibold text-white mb-2">Responsive Design</h3>
+            <p className="text-gray-400 text-sm">Works seamlessly on all devices - desktop, tablet, and mobile.</p>
+          </div>
+
+          {/* Feature 3 - SEO Optimized */}
+          <div className="p-6 rounded-xl bg-white/5 border border-white/10 hover:border-emerald-500/40 hover:bg-white/8 transition-all duration-300 group">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center mb-4 shadow-lg shadow-orange-900/40 group-hover:scale-110 transition-transform duration-300">
+              <Globe className="size-5 text-white" />
+            </div>
+            <h3 className="text-lg font-semibold text-white mb-2">SEO Optimized</h3>
+            <p className="text-gray-400 text-sm">Built-in SEO best practices to help your site rank higher.</p>
+          </div>
+
+          {/* Feature 4 - Custom Styling */}
+          <div className="p-6 rounded-xl bg-white/5 border border-white/10 hover:border-emerald-500/40 hover:bg-white/8 transition-all duration-300 group">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center mb-4 shadow-lg shadow-emerald-900/40 group-hover:scale-110 transition-transform duration-300">
+              <Palette className="size-5 text-white" />
+            </div>
+            <h3 className="text-lg font-semibold text-white mb-2">Custom Styling</h3>
+            <p className="text-gray-400 text-sm">Full control over colors, fonts, layouts, and design elements.</p>
+          </div>
+
+          {/* Feature 5 - Version Control */}
+          <div className="p-6 rounded-xl bg-white/5 border border-white/10 hover:border-emerald-500/40 hover:bg-white/8 transition-all duration-300 group">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center mb-4 shadow-lg shadow-indigo-900/40 group-hover:scale-110 transition-transform duration-300">
+              <GitBranch className="size-5 text-white" />
+            </div>
+            <h3 className="text-lg font-semibold text-white mb-2">Version Control</h3>
+            <p className="text-gray-400 text-sm">Track changes, rollback to previous versions, and manage iterations.</p>
+          </div>
+
+          {/* Feature 6 - Real-time Collaboration */}
+          <div className="p-6 rounded-xl bg-white/5 border border-white/10 hover:border-emerald-500/40 hover:bg-white/8 transition-all duration-300 group">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center mb-4 shadow-lg shadow-rose-900/40 group-hover:scale-110 transition-transform duration-300">
+              <Users className="size-5 text-white" />
+            </div>
+            <h3 className="text-lg font-semibold text-white mb-2">Easy Export</h3>
+            <p className="text-gray-400 text-sm">Download your code or share your creation with others instantly.</p>
+          </div>
+        </div>
+      </div>
+
       {/* Trusted By Section */}
       <div className="mt-20 w-full max-w-3xl text-center">
         <p className="text-xs text-gray-600 uppercase tracking-widest mb-6">Trusted by teams at</p>
-        <div className="flex flex-wrap items-center justify-center gap-10 opacity-40 grayscale hover:opacity-60 transition-opacity duration-500">
-          <img className="max-w-24" src="https://saasly.prebuiltui.com/assets/companies-logo/framer.svg" alt="Framer" />
-          <img className="max-w-24" src="https://saasly.prebuiltui.com/assets/companies-logo/microsoft.svg" alt="Microsoft" />
-          <img className="max-w-24" src="https://saasly.prebuiltui.com/assets/companies-logo/instagram.svg" alt="Instagram" />
-          <img className="max-w-24" src="https://saasly.prebuiltui.com/assets/companies-logo/walmart.svg" alt="Walmart" />
+        <div className="flex flex-wrap items-center justify-center gap-10 opacity-40 hover:opacity-60 transition-opacity duration-500">
+          <div className="flex flex-col items-center gap-2" title="Framer">
+            <Figma className="w-8 h-8 text-gray-400" />
+            <span className="text-xs text-gray-500">Framer</span>
+          </div>
+          <div className="flex flex-col items-center gap-2" title="Microsoft">
+            <Square className="w-8 h-8 text-gray-400" />
+            <span className="text-xs text-gray-500">Microsoft</span>
+          </div>
+          <div className="flex flex-col items-center gap-2" title="Instagram">
+            <Camera className="w-8 h-8 text-gray-400" />
+            <span className="text-xs text-gray-500">Instagram</span>
+          </div>
+          <div className="flex flex-col items-center gap-2" title="Walmart">
+            <ShoppingCart className="w-8 h-8 text-gray-400" />
+            <span className="text-xs text-gray-500">Walmart</span>
+          </div>
         </div>
       </div>
     </section>
