@@ -12,6 +12,8 @@ import Setting from './pages/Setting'
 import Generate from './pages/Generate'
 import MyGenerations from './pages/MyGenerations'
 import YtPreview from './pages/YtPreview'
+import About from './pages/About'
+import Contact from './pages/Support'
 import { useEffect } from 'react'
 
 
@@ -41,6 +43,8 @@ useEffect(()=>{
       
       <Routes>  
         <Route path='/' element={<Home />} />
+        <Route path='/about' element={<About />} />
+        <Route path='/contact' element={<Contact />} />
         <Route path='/pricing' element={<Pricing/>} />
         <Route path='/project/:projectId' element={<Projects/>} />
         <Route path='/projects' element={<MyProjects/>} />

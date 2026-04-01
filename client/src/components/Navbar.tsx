@@ -3,6 +3,7 @@ import { assets } from '../assets/assets';
 import { Link, useNavigate } from 'react-router-dom';
 import {authClient} from "../lib/auth-client"
 import { UserButton } from '@daveyplate/better-auth-ui';
+import { Sparkles } from 'lucide-react';
 
 const Navbar = () => {
      const [menuOpen, setMenuOpen] = useState(false);
@@ -12,13 +13,16 @@ const Navbar = () => {
   return (
     <>
       <nav className="z-50 flex items-center justify-between w-full py-4 px-4 md:px-16 lg:px-24 xl:px-32 glass border-b border-white/8 text-white sticky top-0">
-        <Link to='/'>
-              <img src={assets.logo} alt="logo" className='h-5 sm:h-7' />
+        <Link to='/' className="flex items-center gap-2">
+              <Sparkles className="h-5 sm:h-7 text-emerald-400" />
+              <span className="hidden sm:inline font-semibold text-lg">Creatix</span>
           </Link>
 
           <div className="hidden md:flex items-center gap-8 transition duration-500">
             <Link to='/' >Home</Link>
             <Link to='/projects' >My Projects</Link>
+            <Link to='/about' >About</Link>
+            <Link to='/contact' >Contact</Link>
           </div>
 
           <div className="flex items-center gap-3">
@@ -46,6 +50,8 @@ const Navbar = () => {
           <div className="fixed inset-0 z-[100] bg-black/60 text-white backdrop-blur flex flex-col items-center justify-center text-lg gap-8 md:hidden transition-transform duration-300">
             <Link to='/' onClick={() => setMenuOpen(false)}>Home</Link>
             <Link to='/projects' onClick={() => setMenuOpen(false)}>My Projects</Link>
+            <Link to='/about' onClick={() => setMenuOpen(false)}>About</Link>
+            <Link to='/contact' onClick={() => setMenuOpen(false)}>Contact</Link>
            
             
             <button className="active:ring-3 active:ring-white aspect-square size-10 p-1 items-center justify-center bg-slate-100 hover:bg-slate-200 transition text-black rounded-md flex" onClick={() => setMenuOpen(false)} >
