@@ -48,133 +48,141 @@ export const createUserProject = async (req: Request, res: Response) => {
     // ✅ Respond immediately (IMPORTANT)
     res.status(200).json({ projectId: project.id });
 
-    // ==============================
-    // 🧠 BACKGROUND AI PIPELINE
-    // ==============================
+    // ===================================
+    // 🧠 SMART AI FALLBACK PIPELINE
+    // ===================================
     (async () => {
-      try {
-        console.log("🚀 AI START:", project.id);
+      const FALLBACK_MODELS = [
+        "models/gemini-2.0-flash",
+        "models/gemini-2.5-flash",
+        "models/gemini-1.5-flash",
+      ];
+      let lastError: any = null;
 
-        // STEP 1 — Enhance prompt
-        const enhanceRes = await ai.models.generateContent({
-          model: "gemini-2.5-flash",
-          contents: [
-            {
-              role: "user",
-              parts: [
-                {
-                  text: `You are a prompt enhancement expert.
-Make the user's request detailed, clear and developer-friendly.
-Return ONLY the enhanced prompt.
+      console.log("🚀 AI START:", project.id);
+
+      for (const modelId of FALLBACK_MODELS) {
+        try {
+          console.log(`🤖 Attempting generation with: ${modelId}`);
+
+          const result = await ai.models.generateContent({
+            model: modelId,
+            contents: [
+              {
+                role: "user",
+                parts: [
+                  {
+                    text: `You are an expert web developer and prompt engineer.
+Your task is to take the user's request, enhance it for clarity and detail, and then generate a high-quality, fully responsive website.
+
+Return ONLY a JSON object with this structure:
+{
+  "enhancedPrompt": "the detailed version of the user request",
+  "htmlCode": "the complete HTML code including Tailwind CSS"
+}
+
+Rules:
+- Use Tailwind CSS for ALL styling.
+- Include <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script> in the head.
+- Ensure the code is high-quality, modern, and matches the enhanced prompt.
+- No other text, no markdown fences, JUST the JSON.
 
 User request: "${initial_prompt}"`
-                }
-              ]
-            }
-          ]
-        });
+                  }
+                ]
+              }
+            ]
+          });
 
-        const enhancedPrompt =
-          enhanceRes.candidates?.[0]?.content?.parts?.[0]?.text || initial_prompt;
+          const responseText = result.text || "";
+          let enhancedPrompt = initial_prompt;
+          let htmlCode = "";
 
-        await prisma.conversation.create({
-          data: {
-            role: "assistant",
-            content: `Enhanced prompt: ${enhancedPrompt}`,
-            projectId: project.id,
-          },
-        });
+          try {
+            // Extract JSON if model wraps it in md fences
+            const jsonContent = responseText.replace(/```json\n?|```/g, "").trim();
+            const parsed = JSON.parse(jsonContent);
+            enhancedPrompt = parsed.enhancedPrompt || initial_prompt;
+            htmlCode = parsed.htmlCode || "";
+          } catch (e) {
+            console.error("Failed to parse AI JSON response, falling back to raw text.");
+            htmlCode = responseText;
+          }
 
-        await prisma.conversation.create({
-          data: {
-            role: "assistant",
-            content: "Generating your website...",
-            projectId: project.id,
-          },
-        });
+          if (!htmlCode) throw new Error("Empty AI response");
 
-        console.log("⚡ Generating code...");
-
-        // STEP 2 — Generate code
-        const codeRes = await ai.models.generateContent({
-          model: "gemini-2.5-flash",
-          contents: [
-            {
-              role: "user",
-              parts: [
-                {
-                  text: `Return ONLY valid HTML.
-Use Tailwind CSS for ALL styling.
-Include <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script> in head.
-No explanations, no markdown, no code fences.
-
-Request: "${enhancedPrompt}"`
-                }
-              ]
-            }
-          ]
-        });
-
-        const code =
-          codeRes.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
-
-        if (!code) {
+          // 1️⃣ Save Enhanced Prompt record
           await prisma.conversation.create({
             data: {
               role: "assistant",
-              content: "Failed to generate website. Try again.",
+              content: `Enhanced prompt: ${enhancedPrompt}`,
               projectId: project.id,
             },
           });
 
-          return;
+          // 2️⃣ Save success status message
+          await prisma.conversation.create({
+            data: {
+              role: "assistant",
+              content: "Website created successfully 🚀",
+              projectId: project.id,
+            },
+          });
+
+          console.log("⚡ Saving generated code...");
+
+          const cleanCode = htmlCode
+            .replace(/```[a-z]*\n?/gi, "")
+            .replace(/```$/g, "")
+            .trim();
+
+          // 3️⃣ Save version
+          const version = await prisma.version.create({
+            data: {
+              code: cleanCode,
+              description: "Initial Version",
+              projectId: project.id,
+            },
+          });
+
+          // 4️⃣ Update project
+          await prisma.websiteProject.update({
+            where: { id: project.id },
+            data: {
+              current_code: cleanCode,
+              current_version_index: version.id,
+            },
+          });
+
+          console.log("✅ AI DONE:", project.id, "using", modelId);
+          return; // EXIT LOOP ON SUCCESS
+
+        } catch (err: any) {
+          lastError = err;
+          console.warn(`⚠️ Model ${modelId} failed:`, err.status || err.message);
+          
+          // Only continue to fallback if it's a quota error (429) or model-not-found (404)
+          if (err.status !== 429 && err.status !== 404) {
+            break; 
+          }
         }
-
-        const cleanCode = code
-          .replace(/```[a-z]*\n?/gi, "")
-          .replace(/```$/g, "")
-          .trim();
-
-        // STEP 3 — Save version
-        const version = await prisma.version.create({
-          data: {
-            code: cleanCode,
-            description: "Initial Version",
-            projectId: project.id,
-          },
-        });
-
-        // STEP 4 — Update project
-        await prisma.websiteProject.update({
-          where: { id: project.id },
-          data: {
-            current_code: cleanCode,
-            current_version_index: version.id,
-          },
-        });
-
-        // STEP 5 — Final message
-        await prisma.conversation.create({
-          data: {
-            role: "assistant",
-            content: "Website created successfully 🚀",
-            projectId: project.id,
-          },
-        });
-
-        console.log("✅ AI DONE:", project.id);
-
-      } catch (err) {
-        console.error("🔥 AI ERROR:", err);
-
-        await prisma.conversation.create({
-          data: {
-            role: "assistant",
-            content: "Something went wrong while generating your website.",
-            projectId: project.id,
-          },
-        });
       }
+
+      // If we reach here, all models failed
+      console.error("🔥 ALL AI MODELS FAILED:", lastError);
+
+      const isQuotaError = lastError?.status === 429;
+      const errorMessage = isQuotaError
+        ? "AI Quota limit reached (Free Tier). Please wait 60 seconds and try again."
+        : "Something went wrong while generating your website. Please check your API key.";
+
+      await prisma.conversation.create({
+        data: {
+          role: "assistant",
+          content: errorMessage,
+          projectId: project.id,
+        },
+      });
     })();
 
   } catch (error: any) {
