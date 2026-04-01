@@ -84,6 +84,8 @@ Return ONLY a JSON object with this structure:
 Rules:
 - Use Tailwind CSS for ALL styling.
 - Include <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script> in the head.
+- **FOR IMAGES**: Use **ONLY** 'https://placehold.co/WIDTHxHEIGHT?text=Description' for placeholders. 
+- **NEVER** use 'via.placeholder.com' as it is unreliable.
 - Ensure the code is high-quality, modern, and matches the enhanced prompt.
 - No other text, no markdown fences, JUST the JSON.
 
