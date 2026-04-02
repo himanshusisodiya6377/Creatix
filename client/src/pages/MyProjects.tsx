@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { Project } from '../types';
 import type { IThumbnail } from '../assets/assets_thumb'
-import { Loader2Icon, PlusIcon, TrashIcon, DownloadIcon } from 'lucide-react';
+import { Loader2Icon, PlusIcon, TrashIcon, DownloadIcon, PlayCircleIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '@/configs/axios';
 import { toast } from 'sonner';
@@ -92,7 +92,7 @@ const MyProjects = () => {
             {/* Header */}
             <div className='flex items-center justify-between mb-8'>
               <h1 className='text-3xl font-bold text-white'>My Projects</h1>
-              <button onClick={()=> navigate('/')} className='flex items-center gap-2 text-white px-3 sm:px-6 py-2 rounded bg-gradient-to-r from-emerald-500 to-teal-600 hover:opacity-90 active:scale-95 transition-all'>
+              <button onClick={()=> navigate('/')} className='flex items-center gap-2 text-white px-3 sm:px-6 py-2 rounded bg-linear-to-r from-emerald-500 to-teal-600 hover:opacity-90 active:scale-95 transition-all'>
                 <PlusIcon size={18}/> Create New
               </button>
             </div>
@@ -137,7 +137,7 @@ const MyProjects = () => {
                 {/* Website Projects */}
                 {(filter === 'all' || filter === 'website') && projects.map((project) => (
                   <div 
-                    onClick={()=> navigate(`/projects/${project.id}`)} 
+                    onClick={()=> navigate(`/project/${project.id}`)} 
                     key={`proj-${project.id}`} 
                     className='relative group w-full cursor-pointer glass-card rounded-lg overflow-hidden shadow-md hover:shadow-emerald-700/30 hover:border-emerald-500/40 transition-all duration-300'
                   >
@@ -146,7 +146,7 @@ const MyProjects = () => {
                       {project.current_code ? (
                         <iframe 
                           srcDoc={project.current_code}
-                          className='absolute top-0 left-0 w-[1200px] h-[800px] origin-top-left pointer-events-none'
+                          className='absolute top-0 left-0 w-300 h-200 origin-top-left pointer-events-none'
                           sandbox='allow-script allow-same-origin'
                           style={{transform: 'scale(0.25)'}}
                         />
@@ -169,9 +169,9 @@ const MyProjects = () => {
                       
                       <div onClick={(e)=> e.stopPropagation()} className='flex justify-between items-center'>
                         <span className='text-xs text-gray-500'>{new Date(project.createdAt).toLocaleDateString()}</span>
-                        <div className='flex gap 2 text-white text-sm'>
+                        <div className='flex gap-2 text-white text-sm'>
                           <button onClick={()=>navigate(`/preview/${project.id}`)} className='px-3 py-1.5 bg-white/10 hover:bg-white/15 rounded-md transition-all'>Preview</button>
-                          <button onClick={()=>navigate(`/projects/${project.id}`)} className='px-3 py-1.5 bg-white/10 hover:bg-white/15 rounded-md transition-all'>Open</button>
+                          <button onClick={()=>navigate(`/project/${project.id}`)} className='px-3 py-1.5 bg-white/10 hover:bg-white/15 rounded-md transition-all'>Open</button>
                         </div>
                       </div>
                     </div>
@@ -207,10 +207,16 @@ const MyProjects = () => {
                       </div>
 
                       <div onClick={(e)=> e.stopPropagation()} className='flex justify-between items-center'>
-                        <span className='text-xs text-gray-500'>{new Date(thumbnail.createdAt).toLocaleDateString()}</span>
+                        <span className='text-xs text-gray-500'>{thumbnail.createdAt ? new Date(thumbnail.createdAt).toLocaleDateString() : ''}</span>
                         <div className='flex gap-2 text-white text-sm'>
                           <button 
-                            onClick={() => handleDownload(thumbnail.image_url)} 
+                            onClick={() => navigate(`/preview?thumbnail_url=${encodeURIComponent(thumbnail.image_url || '')}&title=${encodeURIComponent(thumbnail.title || 'Untitled')}`)} 
+                            className='px-3 py-1.5 bg-red-600 hover:bg-red-700 rounded-md transition-all flex items-center gap-1'
+                          >
+                            <PlayCircleIcon size={14} /> YouTube
+                          </button>
+                          <button 
+                            onClick={() => thumbnail.image_url && handleDownload(thumbnail.image_url)} 
                             className='px-3 py-1.5 bg-white/10 hover:bg-white/15 rounded-md transition-all flex items-center gap-1'
                           >
                             <DownloadIcon size={14} /> Download

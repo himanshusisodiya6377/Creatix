@@ -32,10 +32,10 @@ const Preview = () => {
     }
 
   useEffect(()=>{
-    if(!isPending && session?.user){
+    if(!isPending && session?.user && projectId){
       fetchCode()
     }
-    },[session?.user])
+    },[session?.user, projectId, versionId, isPending])
   if(loading){
     return (
       <div className='flex items-center justify-center h-screen'><Loader2Icon className='size-7 animate-spin text-indigo-200' /></div>

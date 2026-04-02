@@ -2,6 +2,50 @@ import {Request,Response} from 'express';
 import prisma from "../lib/prisma.js";
 import ai from "../configs/ai.js";
 
+// ==============================
+// WEBSITE VALIDATION FUNCTION
+// ==============================
+const validateWebsiteCode = (code: string): boolean => {
+  // Check for required HTML structure
+  if (!code.includes('<html') && !code.includes('<!DOCTYPE')) {
+    console.warn('❌ Validation: Missing HTML structure');
+    return false;
+  }
+  
+  // Check for body tag
+  if (!code.includes('<body')) {
+    console.warn('❌ Validation: Missing body tag');
+    return false;
+  }
+  
+  // Check for multi-page router pattern (pages object + addEventListener)
+  if (!code.includes('pages') || !code.includes('hashchange')) {
+    console.warn('❌ Validation: Missing multi-page router pattern');
+    return false;
+  }
+  
+  // Check for at least one page link (hash navigation)
+  if (!/href\s*=\s*["']#\//g.test(code)) {
+    console.warn('❌ Validation: Missing page navigation links');
+    return false;
+  }
+
+  // Check for Tailwind CSS
+  if (!code.includes('tailwindcss') && !code.includes('tailwind')) {
+    console.warn('❌ Validation: Missing Tailwind CSS');
+    return false;
+  }
+
+  // Check minimum code length (valid website should be >1KB)
+  if (code.length < 1000) {
+    console.warn('❌ Validation: Code too short - likely incomplete');
+    return false;
+  }
+
+  console.log('✅ Validation passed - Website structure is valid');
+  return true;
+};
+
 
 // Controller Function to make Revision
 export const makeRevision = async (req: Request, res: Response) => {
@@ -99,6 +143,16 @@ CRITICAL REQUIREMENTS:
 - Make sure it's a complete, standalone HTML document with Tailwind CSS.
 - Return the HTML Code Only, nothing else. No explanations or code fences.
 
+MULTIPAGE INTEGRITY:
+- Keep ALL 5 pages (Home, About, Services, Pricing, Contact) intact and fully functional
+- EVERY page MUST have working navigation links to ALL other pages
+- ALL navigation links MUST use format: <a href="#/page-name">
+- Keep footer with page links on ALL pages
+- Mobile menu MUST work on all pages with all page links
+- Apply changes ONLY to requested elements - do NOT break or remove any page links
+- Each page function MUST return COMPLETE HTML (no partial code)
+- Verify: clicking every nav link must navigate correctly to that page
+
 Current website code:
 ${currentProject.current_code}
 
@@ -122,9 +176,27 @@ Requested change: "${enhancedPrompt}"`
     message: "Unable to generate code, please try again"
 });
     }
+
+    // ✅ Validate HTML structure before saving
+    const cleanCode = code.replace(/```[a-z]*\n?/gi,'').replace(/```$/g,'').trim();
+    const isValidWebsite = validateWebsiteCode(cleanCode);
+    
+    if (!isValidWebsite) {
+        await prisma.conversation.create({
+            data: {
+                role: 'assistant',
+                content: "❌ Changes rejected - generated code doesn't maintain website structure. Please try a different request.",
+                projectId
+            }
+        })
+        return res.status(400).json({
+            message: "Generated code is invalid. Website structure was not maintained. Please try again with a different request."
+        });
+    }
+
     const version = await prisma.version.create({
         data:{
-             code: code.replace(/```[a-z]*\n?/gi,'').replace(/```$/g,'').trim(),
+             code: cleanCode,
             description: 'changes made',
             projectId
         }
@@ -133,7 +205,7 @@ Requested change: "${enhancedPrompt}"`
     await prisma.conversation.create({
         data:{
             role: 'assistant',
-            content: "I've made the changes to your website! You can now preview it",
+            content: "✅ Changes saved! Your website has been updated. You can now preview it",
             projectId
         }
     })
@@ -141,7 +213,7 @@ Requested change: "${enhancedPrompt}"`
     await prisma.websiteProject.update({
         where: {id: projectId},
         data:{
-           current_code: code.replace(/```[a-z]*\n?/gi,'').replace(/```$/g,'').trim(),
+           current_code: cleanCode,
            current_version_index: version.id
         }
     })

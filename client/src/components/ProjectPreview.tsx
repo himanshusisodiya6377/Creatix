@@ -86,13 +86,25 @@ const ProjectPreview = forwardRef<ProjectPreviewRef,ProjectPreviewProps>(({proje
   }
   return (
     <div className='relative h-full bg-gray-900 flex-1 rounded-xl overflow-hidden max-sm:ml-2'>
-      {project.current_code ? (<><iframe ref={iframeRef} srcDoc={injectPreview(project.current_code)} className={`h-full max-sm:w-full ${resolutions[device]} mx-auto transition-all`} /> {showEditorPanel && selectedElement && (<EditorPanel selectedElement={selectedElement} onUpdate={handleUpdate} onClose={()=>{
-        setSelectedElement(null)
-        if(iframeRef.current?.contentWindow){
-          iframeRef.current?.contentWindow.postMessage({type:'CLEAR_SELECTION_REQUEST'},'*')
-        }
-      }}/>)} </>) : isGenerating && (<LoaderSteps />)}
-      
+      {project.current_code ? (
+        <>
+          <iframe ref={iframeRef} srcDoc={injectPreview(project.current_code)} className={`h-full max-sm:w-full ${resolutions[device]} mx-auto transition-all`} /> 
+          {showEditorPanel && selectedElement && (
+            <EditorPanel selectedElement={selectedElement} onUpdate={handleUpdate} onClose={()=>{
+              setSelectedElement(null)
+              if(iframeRef.current?.contentWindow){
+                iframeRef.current?.contentWindow.postMessage({type:'CLEAR_SELECTION_REQUEST'},'*')
+              }
+            }}/>
+          )}
+        </> 
+      ) : isGenerating ? (
+        <LoaderSteps />
+      ) : (
+        <div className='flex items-center justify-center h-full'>
+          <p className='text-gray-400 text-center'>No content to display</p>
+        </div>
+      )}
     </div>
   )
 })
