@@ -46,7 +46,7 @@ const EditorPanel = ({selectedElement, onUpdate, onClose}: EditorPanelProps) => 
         <h3 className='font-semibold text-gray-800'>
             Edit Element
         </h3>
-        <button onClick={onClose} className='p-1  hover:bg-gray-100 rounded-full'><X className='w-4 h-4 tex-gray-500' /></button>
+        <button onClick={onClose} className='p-1 text-gray-600 hover:bg-gray-200 hover:text-gray-800 rounded-full transition-colors'><X className='w-5 h-5' /></button>
       </div>
       <div className='space-y-4 text-black'>
         <div>

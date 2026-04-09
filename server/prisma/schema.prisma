@@ -148,7 +148,7 @@ model Thumbnail {
   style          String
   aspect_ratio   String   @default("16:9")
   color_scheme   String?
-  text_overlay   Boolean  @default(false)
+  text_overlay   String   @default("")
   image_url      String   @default("")
   prompt_used    String?
   user_prompt    String?

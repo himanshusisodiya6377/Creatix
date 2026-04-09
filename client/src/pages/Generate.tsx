@@ -18,6 +18,7 @@ const Generate = () => {
     const {data:session, isPending} = authClient.useSession();
     const [title, setTitle] = useState('')
     const [additionalDetails, setAdditionalDetails] = useState('')
+    const [textOverlay, setTextOverlay] = useState('')
 
     const [aspectRatio, setAspectRatio] = useState<AspectRatio>('16:9')
     const [colorSchemeId, setColorSchemeId] = useState<string>(colorSchemes[0].id)
@@ -42,7 +43,7 @@ const Generate = () => {
     style,
     aspect_ratio: aspectRatio,
    color_scheme: colorSchemeId,
-    text_overlay: true,
+    text_overlay: textOverlay,
   }
 
   try {
@@ -82,6 +83,7 @@ const fetchThumbnail = async () => {
     setColorSchemeId(data?.thumbnail?.color_scheme)
     setAspectRatio(data?.thumbnail?.aspect_ratio)
     setStyle(data?.thumbnail?.style)
+    setTextOverlay(data?.thumbnail?.text_overlay || '')
   } catch (error: any) {
     console.log(error);
     toast.error(error?.response?.data?.message || error.message)
@@ -177,6 +179,24 @@ useEffect(() => {
     placeholder="Add any specific elements, mood, or style preferences..."
     className="w-full px-4 py-3 rounded-lg border border-white/10 bg-white/6 text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-pink-500 resize-none"
   />
+</div>
+
+<div className="space-y-2">
+  <label className="block text-sm font-medium">
+    Thumbnail Text <span className="text-zinc-400 text-xs">(what text to show on thumbnail)</span>
+  </label>
+
+  <input
+    type="text"
+    value={textOverlay}
+    onChange={(e) => setTextOverlay(e.target.value)}
+    maxLength={50}
+    placeholder="e.g., UNBOXING, FREE TIPS, MUST WATCH"
+    className="w-full px-4 py-3 rounded-lg border border-white/12 bg-black/20 text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-pink-500"
+  />
+  <div className="flex justify-end">
+    <span className="text-xs text-zinc-400">{textOverlay.length}/50</span>
+  </div>
 </div>
 
 </div>

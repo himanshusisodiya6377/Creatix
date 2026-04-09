@@ -20,8 +20,8 @@ export async function generateImageWithClipdrop(params: ClipdropGenerationParams
 
     const { prompt, width = 1024, height = 1024 } = params;
 
-    console.log('🚀 Calling Clipdrop Text-to-Image API...');
-    console.log(`📐 Requested dimensions: ${width}x${height}`);
+    console.log('Calling Clipdrop Text-to-Image API...');
+    console.log(`Requested dimensions: ${width}x${height}`);
 
     // Create form data for Clipdrop API
     const formData = new FormData();
@@ -40,20 +40,19 @@ export async function generateImageWithClipdrop(params: ClipdropGenerationParams
       }
     );
 
-    console.log('✅ Image generated successfully from Clipdrop');
-    console.log('📦 Response status:', response.status);
+    console.log('Image generated successfully from Clipdrop');
+    console.log('Response status:', response.status);
 
-    // Log remaining credits
     const remainingCredits = response.headers['x-remaining-credits'];
     const creditsConsumed = response.headers['x-credits-consumed'];
-    if (remainingCredits) console.log(`💰 Remaining credits: ${remainingCredits}`);
-    if (creditsConsumed) console.log(`💳 Credits consumed: ${creditsConsumed}`);
+    if (remainingCredits) console.log(`Remaining credits: ${remainingCredits}`);
+    if (creditsConsumed) console.log(`Credits consumed: ${creditsConsumed}`);
 
     let imageBuffer = Buffer.from(response.data);
 
     // Resize image to match requested aspect ratio
     if (width !== 1024 || height !== 1024) {
-      console.log(`🔄 Resizing image from 1024x1024 to ${width}x${height}...`);
+      console.log(`Resizing image from 1024x1024 to ${width}x${height}...`);
       
       try {
         imageBuffer = await sharp(imageBuffer)
@@ -64,18 +63,18 @@ export async function generateImageWithClipdrop(params: ClipdropGenerationParams
           .png()
           .toBuffer();
         
-        console.log(`✅ Image resized to ${width}x${height}`);
+        console.log(`Image resized to ${width}x${height}`);
       } catch (resizeError) {
-        console.warn('⚠️  Could not resize image, returning original size');
+        console.warn('Could not resize image, returning original size');
         // If resize fails, return original buffer
       }
     }
 
-    console.log('✅ Image buffer created, size:', imageBuffer.length);
+    console.log('Image buffer created, size:', imageBuffer.length);
 
     return imageBuffer;
   } catch (error: any) {
-    console.error('❌ Clipdrop API failed:', error.message);
+    console.error('Clipdrop API failed:', error.message);
 
     if (error.response?.data) {
       try {

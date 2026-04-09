@@ -2,10 +2,47 @@ import { Request, Response } from "express";
 import prisma from "../lib/prisma.js";
 import ai from "../configs/ai.js";
 
+const validateWebsiteCode = (code: string): boolean => {
+  // Check for required HTML structure
+  if (!code.includes('<html') && !code.includes('<!DOCTYPE')) {
+    console.warn('Validation: Missing HTML structure');
+    return false;
+  }
+  
+  // Check for body tag
+  if (!code.includes('<body')) {
+    console.warn('Validation: Missing body tag');
+    return false;
+  }
+  
+  // Check for multi-page router pattern (pages object + addEventListener)
+  if (!code.includes('pages') || !code.includes('hashchange')) {
+    console.warn('Validation: Missing multi-page router pattern');
+    return false;
+  }
+  
+  // Check for at least one page link (hash navigation)
+  if (!/href\s*=\s*["']#\//g.test(code)) {
+    console.warn('Validation: Missing page navigation links');
+    return false;
+  }
 
-// ==============================
-// CREATE PROJECT (NON-BLOCKING)
-// ==============================
+  // Check for Tailwind CSS
+  if (!code.includes('tailwindcss') && !code.includes('tailwind')) {
+    console.warn('Validation: Missing Tailwind CSS');
+    return false;
+  }
+
+  // Check minimum code length (valid website should be >1KB)
+  if (code.length < 1000) {
+    console.warn('Validation: Code too short - likely incomplete');
+    return false;
+  }
+
+  console.log('Validation passed - Website structure is valid');
+  return true;
+};
+
 export const createUserProject = async (req: Request, res: Response) => {
   const userId = req.userId;
 
@@ -16,7 +53,6 @@ export const createUserProject = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    // 1️⃣ Create project
     const project = await prisma.websiteProject.create({
       data: {
         name:
@@ -28,7 +64,6 @@ export const createUserProject = async (req: Request, res: Response) => {
       },
     });
 
-    // 2️⃣ Save user message
     await prisma.conversation.create({
       data: {
         role: "user",
@@ -37,7 +72,6 @@ export const createUserProject = async (req: Request, res: Response) => {
       },
     });
 
-    // 3️⃣ Update stats
     await prisma.user.update({
       where: { id: userId },
       data: {
@@ -45,12 +79,8 @@ export const createUserProject = async (req: Request, res: Response) => {
       },
     });
 
-    // ✅ Respond immediately (IMPORTANT)
     res.status(200).json({ projectId: project.id });
 
-    // ===================================
-    // 🧠 SMART AI FALLBACK PIPELINE
-    // ===================================
     (async () => {
       const FALLBACK_MODELS = [
         "models/gemini-2.0-flash",
@@ -59,11 +89,24 @@ export const createUserProject = async (req: Request, res: Response) => {
       ];
       let lastError: any = null;
 
-      console.log("🚀 AI START:", project.id);
-
       for (const modelId of FALLBACK_MODELS) {
         try {
-          console.log(`🤖 Attempting generation with: ${modelId}`);
+          const systemPrompt = `Expert web dev: Create a multi-page SPA with hash routing. Return ONLY JSON:
+{"enhancedPrompt": "detailed version", "htmlCode": "complete HTML"}
+
+MUST: 5 pages (Home, About, Services, Pricing, Contact) + responsive nav with mobile menu
+TECH: Tailwind CSS, vanilla JS router, placehold.co images only, modern code
+STRUCTURE: pages object with functions returning HTML, addEventListener('hashchange')
+
+CRITICAL FOR COMPLETION:
+- ALL pages MUST be fully implemented with complete content (no placeholders)
+- EVERY page MUST have working navigation links to ALL other pages
+- Navigation links format: <a href="#/page-name"> for all 5 pages on every page
+- Footer MUST appear on every page with links to all pages
+- Mobile menu MUST work on ALL pages and show all page links
+- Each page function MUST return complete HTML, not partial code
+- Test all links work: clicking nav items must show correct page
+- NO missing or broken page links - ALL links must be functional`;
 
           const result = await ai.models.generateContent({
             model: modelId,
@@ -72,27 +115,16 @@ export const createUserProject = async (req: Request, res: Response) => {
                 role: "user",
                 parts: [
                   {
-                    text: `You are an expert web developer and prompt engineer.
-Your task is to take the user's request, enhance it for clarity and detail, and then generate a high-quality, fully responsive website.
-
-Return ONLY a JSON object with this structure:
-{
-  "enhancedPrompt": "the detailed version of the user request",
-  "htmlCode": "the complete HTML code including Tailwind CSS"
-}
-
-Rules:
-- Use Tailwind CSS for ALL styling.
-- Include <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script> in the head.
-- Ensure the code is high-quality, modern, and matches the enhanced prompt.
-- No other text, no markdown fences, JUST the JSON.
-
-User request: "${initial_prompt}"`
+                    text: systemPrompt + `\n\nUser request: "${initial_prompt}"\n\nGenerate complete working website NOW.`,
                   }
                 ]
               }
-            ]
-          });
+            ],
+            cachedContent: {
+              enabled: true,
+              ttlSeconds: 3600 // 1 hour cache
+            }
+          } as any);
 
           const responseText = result.text || "";
           let enhancedPrompt = initial_prompt;
@@ -111,7 +143,11 @@ User request: "${initial_prompt}"`
 
           if (!htmlCode) throw new Error("Empty AI response");
 
-          // 1️⃣ Save Enhanced Prompt record
+          const isValidWebsite = validateWebsiteCode(htmlCode);
+          if (!isValidWebsite) {
+            throw new Error("Invalid website structure - missing required HTML/router elements");
+          }
+
           await prisma.conversation.create({
             data: {
               role: "assistant",
@@ -120,23 +156,19 @@ User request: "${initial_prompt}"`
             },
           });
 
-          // 2️⃣ Save success status message
           await prisma.conversation.create({
             data: {
               role: "assistant",
-              content: "Website created successfully 🚀",
+              content: "Website created successfully",
               projectId: project.id,
             },
           });
-
-          console.log("⚡ Saving generated code...");
 
           const cleanCode = htmlCode
             .replace(/```[a-z]*\n?/gi, "")
             .replace(/```$/g, "")
             .trim();
 
-          // 3️⃣ Save version
           const version = await prisma.version.create({
             data: {
               code: cleanCode,
@@ -145,7 +177,6 @@ User request: "${initial_prompt}"`
             },
           });
 
-          // 4️⃣ Update project
           await prisma.websiteProject.update({
             where: { id: project.id },
             data: {
@@ -154,12 +185,11 @@ User request: "${initial_prompt}"`
             },
           });
 
-          console.log("✅ AI DONE:", project.id, "using", modelId);
           return; // EXIT LOOP ON SUCCESS
 
         } catch (err: any) {
           lastError = err;
-          console.warn(`⚠️ Model ${modelId} failed:`, err.status || err.message);
+          console.warn(`Model ${modelId} failed:`, err.status || err.message);
           
           // Only continue to fallback if it's a quota error (429) or model-not-found (404)
           if (err.status !== 429 && err.status !== 404) {
@@ -169,7 +199,7 @@ User request: "${initial_prompt}"`
       }
 
       // If we reach here, all models failed
-      console.error("🔥 ALL AI MODELS FAILED:", lastError);
+      console.error("ALL AI MODELS FAILED:", lastError);
 
       const isQuotaError = lastError?.status === 429;
       const errorMessage = isQuotaError
@@ -192,10 +222,6 @@ User request: "${initial_prompt}"`
   }
 };
 
-
-// ==============================
-// GET SINGLE PROJECT
-// ==============================
 export const getUserProject = async (req: Request, res: Response) => {
   try {
     const userId = req.userId;
@@ -222,10 +248,6 @@ export const getUserProject = async (req: Request, res: Response) => {
   }
 };
 
-
-// ==============================
-// GET ALL PROJECTS
-// ==============================
 export const getUserProjects = async (req: Request, res: Response) => {
   try {
     const userId = req.userId;
@@ -325,9 +347,6 @@ export const getThumbnailbyId = async (req: Request, res: Response)=>{
   }
 }
 
-// ==============================
-// CHECK PROJECT STATUS (for polling)
-// ==============================
 export const checkProjectStatus = async (req: Request, res: Response) => {
   try {
     const userId = req.userId;

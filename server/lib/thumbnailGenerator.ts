@@ -43,30 +43,30 @@ function generateImagePromptLocally(userPrompt: string): string {
   // Add final quality boost
   enhancedPrompt += ", 8K resolution, award-winning, no watermark";
 
-  console.log("✨ Enhanced prompt (local):", enhancedPrompt.substring(0, 150) + "...");
+  console.log("Enhanced prompt (local):", enhancedPrompt.substring(0, 150) + "...");
   return enhancedPrompt;
 }
 
 // Generate image using Clipdrop API
 async function generateImageWithClipdropAPI(prompt: string, width = 1024, height = 1024): Promise<Buffer> {
   try {
-    console.log("🚀 Calling Clipdrop API...");
+    console.log("Calling Clipdrop API...");
     
     // Shorten prompt if too long
     const maxLength = 500;
     const shortenedPrompt = prompt.length > maxLength ? prompt.substring(0, maxLength) : prompt;
     
-    console.log("⏳ Generating image with Clipdrop...");
+    console.log("Generating image with Clipdrop...");
     const imageBuffer = await generateImageWithClipdrop({
       prompt: shortenedPrompt,
       width,
       height,
     });
 
-    console.log("✅ Image generated successfully");
+    console.log("Image generated successfully");
     return imageBuffer;
   } catch (error: any) {
-    console.error("❌ Clipdrop API failed:", error.message);
+    console.error("Clipdrop API failed:", error.message);
     if (error.response?.data) {
       console.error("Response data:", JSON.stringify(error.response.data, null, 2));
     }
@@ -80,22 +80,22 @@ export async function generateThumbnailSVG(
   const { prompt, width = 1024, height = 1024 } = options;
 
   try {
-    console.log("🎨 Starting AI thumbnail generation for prompt:", prompt);
+    console.log("Starting AI thumbnail generation for prompt:", prompt);
 
     // Step 1: Generate enhanced prompt locally (no API calls)
-    console.log("📝 Enhancing prompt locally...");
+    console.log("Enhancing prompt locally...");
     const enhancedPrompt = generateImagePromptLocally(prompt);
 
     // Step 2: Generate the actual image using Clipdrop
-    console.log("🖼️  Generating image with Clipdrop...");
+    console.log("Generating image with Clipdrop...");
     const imageBuffer = await generateImageWithClipdropAPI(enhancedPrompt, width, height);
 
-    console.log("✅ Image generated successfully");
-    console.log("✅ Image buffer created, size:", imageBuffer.length);
+    console.log("Image generated successfully");
+    console.log("Image buffer created, size:", imageBuffer.length);
 
     return imageBuffer;
   } catch (error) {
-    console.error("❌ Thumbnail generation failed:", error);
+    console.error("Thumbnail generation failed:", error);
     throw error;
   }
 }

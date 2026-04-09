@@ -22,7 +22,6 @@ const Navbar = () => {
             <Link to='/' >Home</Link>
             <Link to='/projects' >My Projects</Link>
             <Link to='/about' >About</Link>
-            <Link to='/contact' >Contact</Link>
           </div>
 
           <div className="flex items-center gap-3">
@@ -51,7 +50,6 @@ const Navbar = () => {
             <Link to='/' onClick={() => setMenuOpen(false)}>Home</Link>
             <Link to='/projects' onClick={() => setMenuOpen(false)}>My Projects</Link>
             <Link to='/about' onClick={() => setMenuOpen(false)}>About</Link>
-            <Link to='/contact' onClick={() => setMenuOpen(false)}>Contact</Link>
            
             
             <button className="active:ring-3 active:ring-white aspect-square size-10 p-1 items-center justify-center bg-slate-100 hover:bg-slate-200 transition text-black rounded-md flex" onClick={() => setMenuOpen(false)} >

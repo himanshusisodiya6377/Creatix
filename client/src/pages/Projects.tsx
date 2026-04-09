@@ -82,18 +82,21 @@ const Projects = () => {
   }
 
   useEffect(()=>{
-    if(session?.user){
+    if(session?.user && projectId){
+      setLoading(true);
+      setProject(null);
+      setIsGenerating(true);
       fetchProject()
     }
     else if(!isPending && !session?.user){
       navigate('/')
       toast("Please Login to View")
     }
-  },[session?.user])
+  },[session?.user, projectId])
   
   // Polling for project generation status
   useEffect(()=> {
-    if(project && !project.current_code){
+    if(project && !project.current_code && projectId){
       const pollStatus = async () => {
         try {
           const { data } = await api.get(`/api/user/project/status/${projectId}`);

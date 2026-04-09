@@ -27,7 +27,7 @@ export async function generateImageWithPicsArt(params: PicsArtGenerationParams):
 
     const { prompt, width = 1024, height = 1024 } = params;
 
-    console.log('🚀 Calling PicsArt Text2Image API...');
+    console.log('Calling PicsArt Text2Image API...');
 
     // Step 1: Submit the text-to-image generation request
     const response = await axios.post(
@@ -47,9 +47,9 @@ export async function generateImageWithPicsArt(params: PicsArtGenerationParams):
       }
     );
 
-    console.log('✅ Image generation request submitted');
-    console.log('📦 Response status:', response.status);
-    console.log('📦 Response data:', JSON.stringify(response.data, null, 2));
+    console.log('Image generation request submitted');
+    console.log('Response status:', response.status);
+    console.log('Response data:', JSON.stringify(response.data, null, 2));
 
     const transactionId = response.data?.inference_id || response.data?.transaction_id || response.data?.id;
     
@@ -58,7 +58,7 @@ export async function generateImageWithPicsArt(params: PicsArtGenerationParams):
       throw new Error('No inference ID received from PicsArt API');
     }
 
-    console.log(`⏳ Waiting for image generation (Inference ID: ${transactionId})...`);
+    console.log(`Waiting for image generation (Inference ID: ${transactionId})...`);
 
     // Step 2: Poll for the result
     let result: PicsArtAsyncResult | null = null;
@@ -102,17 +102,17 @@ export async function generateImageWithPicsArt(params: PicsArtGenerationParams):
         result = resultResponse.data;
         attempts++;
 
-        console.log(`  ✓ Poll attempt ${attempts}/${maxAttempts} (${attempts * 2}s elapsed)`);
+        console.log(`  Poll attempt ${attempts}/${maxAttempts} (${attempts * 2}s elapsed)`);
         console.log(`    Status: ${result?.status || 'unknown'}`);
 
         // Check if the result is ready
         if (result?.images && result.images.length > 0) {
-          console.log('✅ Image generation completed!');
+          console.log('Image generation completed!');
           break;
         }
 
         if (result?.image_urls && result.image_urls.length > 0) {
-          console.log('✅ Image generation completed!');
+          console.log('Image generation completed!');
           // Convert image_urls to images format
           result.images = result.image_urls.map(url => ({ url }));
           break;
@@ -135,7 +135,7 @@ export async function generateImageWithPicsArt(params: PicsArtGenerationParams):
     }
 
     const imageUrl = result.images[0].url;
-    console.log('📥 Downloading image from URL...');
+    console.log('Downloading image from URL...');
 
     // Step 3: Download the image
     const imageResponse = await axios.get(imageUrl, {
@@ -144,12 +144,12 @@ export async function generateImageWithPicsArt(params: PicsArtGenerationParams):
     });
 
     const imageBuffer = Buffer.from(imageResponse.data);
-    console.log('✅ Image downloaded successfully');
-    console.log('✅ Image buffer created, size:', imageBuffer.length);
+    console.log('Image downloaded successfully');
+    console.log('Image buffer created, size:', imageBuffer.length);
 
     return imageBuffer;
   } catch (error: any) {
-    console.error('❌ PicsArt API failed:', error.message);
+    console.error('PicsArt API failed:', error.message);
     if (error.response?.data) {
       console.error('Response data:', JSON.stringify(error.response.data, null, 2));
     }
