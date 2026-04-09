@@ -27,11 +27,11 @@ const colorSchemeDescriptions = {
 // Background function to generate and upload the thumbnail
 const generateThumbnailAsync = async (thumbnailId: string, userId: string, title: string, user_prompt: string, style: string, aspect_ratio: string, color_scheme: string) => {
   try {
-    console.log(`\n📋 Building prompt for thumbnail:`);
-    console.log(`  📌 Style: ${style}`);
-    console.log(`  🎨 Color Scheme: ${color_scheme}`);
-    console.log(`  📐 Aspect Ratio: ${aspect_ratio}`);
-    console.log(`  💬 Title: ${title}`);
+    console.log(`\nBuilding prompt for thumbnail:`);
+    console.log(`  Style: ${style}`);
+    console.log(`  Color Scheme: ${color_scheme}`);
+    console.log(`  Aspect Ratio: ${aspect_ratio}`);
+    console.log(`  Title: ${title}`);
 
     let prompt = `Create a ${stylePrompts[style as keyof typeof stylePrompts]} thumbnail for: "${title}"`;
 
@@ -48,7 +48,7 @@ const generateThumbnailAsync = async (thumbnailId: string, userId: string, title
     prompt += ` TEXT MUST BE SPELLED CORRECTLY AND MATCH EXACTLY: "${title}". The text should have high contrast with the background for maximum readability.`;
     prompt += ` The thumbnail should be ${aspect_ratio}, visually stunning, and designed to maximize click-through rate. Make it bold, professional, and impossible to ignore.`;
     
-    console.log(`\n✅ Final Prompt:\n${prompt}\n`);
+    console.log(`\nFinal Prompt:\n${prompt}\n`);
 
     // Define exact dimensions for each aspect ratio to avoid stretching
     const dimensionMap: Record<string, { width: number; height: number }> = {
@@ -62,8 +62,8 @@ const generateThumbnailAsync = async (thumbnailId: string, userId: string, title
     const dimensions = dimensionMap[aspect_ratio] || dimensionMap['16:9'];
     const { width, height } = dimensions;
 
-    console.log(`🎨 Generating thumbnail with Clipdrop...`);
-    console.log(`  📐 Dimensions: ${width}x${height} (Aspect Ratio: ${aspect_ratio})`);
+    console.log(`Generating thumbnail with Clipdrop...`);
+    console.log(`  Dimensions: ${width}x${height} (Aspect Ratio: ${aspect_ratio})`);
     
     // Generate the image using Clipdrop
     const imageBuffer = await generateImageWithClipdrop({
@@ -98,14 +98,14 @@ const generateThumbnailAsync = async (thumbnailId: string, userId: string, title
 
     // Remove image file from disk
     fs.unlinkSync(filePath)
-    console.log(`✅ Thumbnail ${thumbnailId} generated successfully`)
+    console.log(`Thumbnail ${thumbnailId} generated successfully`)
   } catch (error) {
-    console.error(`❌ Error generating thumbnail ${thumbnailId}:`, error);
+    console.error(`Error generating thumbnail ${thumbnailId}:`, error);
     // Delete the thumbnail record if generation failed (only save successful ones)
     await prisma.thumbnail.deleteMany({
       where: { id: thumbnailId }
     });
-    console.log(`🗑️ Deleted failed thumbnail ${thumbnailId}`);
+    console.log(`Deleted failed thumbnail ${thumbnailId}`);
   }
 }
 

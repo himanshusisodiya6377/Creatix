@@ -2,47 +2,44 @@ import {Request,Response} from 'express';
 import prisma from "../lib/prisma.js";
 import ai from "../configs/ai.js";
 
-// ==============================
-// WEBSITE VALIDATION FUNCTION
-// ==============================
 const validateWebsiteCode = (code: string): boolean => {
   // Check for required HTML structure
   if (!code.includes('<html') && !code.includes('<!DOCTYPE')) {
-    console.warn('❌ Validation: Missing HTML structure');
+    console.warn('Validation: Missing HTML structure');
     return false;
   }
   
   // Check for body tag
   if (!code.includes('<body')) {
-    console.warn('❌ Validation: Missing body tag');
+    console.warn('Validation: Missing body tag');
     return false;
   }
   
   // Check for multi-page router pattern (pages object + addEventListener)
   if (!code.includes('pages') || !code.includes('hashchange')) {
-    console.warn('❌ Validation: Missing multi-page router pattern');
+    console.warn('Validation: Missing multi-page router pattern');
     return false;
   }
   
   // Check for at least one page link (hash navigation)
   if (!/href\s*=\s*["']#\//g.test(code)) {
-    console.warn('❌ Validation: Missing page navigation links');
+    console.warn('Validation: Missing page navigation links');
     return false;
   }
 
   // Check for Tailwind CSS
   if (!code.includes('tailwindcss') && !code.includes('tailwind')) {
-    console.warn('❌ Validation: Missing Tailwind CSS');
+    console.warn('Validation: Missing Tailwind CSS');
     return false;
   }
 
   // Check minimum code length (valid website should be >1KB)
   if (code.length < 1000) {
-    console.warn('❌ Validation: Code too short - likely incomplete');
+    console.warn('Validation: Code too short - likely incomplete');
     return false;
   }
 
-  console.log('✅ Validation passed - Website structure is valid');
+  console.log('Validation passed - Website structure is valid');
   return true;
 };
 
@@ -177,7 +174,6 @@ Requested change: "${enhancedPrompt}"`
 });
     }
 
-    // ✅ Validate HTML structure before saving
     const cleanCode = code.replace(/```[a-z]*\n?/gi,'').replace(/```$/g,'').trim();
     const isValidWebsite = validateWebsiteCode(cleanCode);
     
@@ -185,7 +181,7 @@ Requested change: "${enhancedPrompt}"`
         await prisma.conversation.create({
             data: {
                 role: 'assistant',
-                content: "❌ Changes rejected - generated code doesn't maintain website structure. Please try a different request.",
+                content: "Changes rejected - generated code doesn't maintain website structure. Please try a different request.",
                 projectId
             }
         })
@@ -205,7 +201,7 @@ Requested change: "${enhancedPrompt}"`
     await prisma.conversation.create({
         data:{
             role: 'assistant',
-            content: "✅ Changes saved! Your website has been updated. You can now preview it",
+            content: "Changes saved! Your website has been updated. You can now preview it",
             projectId
         }
     })

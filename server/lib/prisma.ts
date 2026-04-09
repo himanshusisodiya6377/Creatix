@@ -16,9 +16,9 @@ const prisma = new PrismaClient({ adapter })
 
 // Test the connection
 prisma.$connect().then(() => {
-  console.log('✅ Prisma connected to database');
+  console.log('Prisma connected to database');
 }).catch((error) => {
-  console.error('❌ Prisma connection failed:', error);
+  console.error('Prisma connection failed:', error);
   process.exit(1);
 });
 

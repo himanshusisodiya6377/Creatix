@@ -2,54 +2,47 @@ import { Request, Response } from "express";
 import prisma from "../lib/prisma.js";
 import ai from "../configs/ai.js";
 
-// ==============================
-// WEBSITE VALIDATION FUNCTION
-// ==============================
 const validateWebsiteCode = (code: string): boolean => {
   // Check for required HTML structure
   if (!code.includes('<html') && !code.includes('<!DOCTYPE')) {
-    console.warn('❌ Validation: Missing HTML structure');
+    console.warn('Validation: Missing HTML structure');
     return false;
   }
   
   // Check for body tag
   if (!code.includes('<body')) {
-    console.warn('❌ Validation: Missing body tag');
+    console.warn('Validation: Missing body tag');
     return false;
   }
   
   // Check for multi-page router pattern (pages object + addEventListener)
   if (!code.includes('pages') || !code.includes('hashchange')) {
-    console.warn('❌ Validation: Missing multi-page router pattern');
+    console.warn('Validation: Missing multi-page router pattern');
     return false;
   }
   
   // Check for at least one page link (hash navigation)
   if (!/href\s*=\s*["']#\//g.test(code)) {
-    console.warn('❌ Validation: Missing page navigation links');
+    console.warn('Validation: Missing page navigation links');
     return false;
   }
 
   // Check for Tailwind CSS
   if (!code.includes('tailwindcss') && !code.includes('tailwind')) {
-    console.warn('❌ Validation: Missing Tailwind CSS');
+    console.warn('Validation: Missing Tailwind CSS');
     return false;
   }
 
   // Check minimum code length (valid website should be >1KB)
   if (code.length < 1000) {
-    console.warn('❌ Validation: Code too short - likely incomplete');
+    console.warn('Validation: Code too short - likely incomplete');
     return false;
   }
 
-  console.log('✅ Validation passed - Website structure is valid');
+  console.log('Validation passed - Website structure is valid');
   return true;
 };
 
-
-// ==============================
-// CREATE PROJECT (NON-BLOCKING)
-// ==============================
 export const createUserProject = async (req: Request, res: Response) => {
   const userId = req.userId;
 
@@ -60,7 +53,6 @@ export const createUserProject = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    // 1️⃣ Create project
     const project = await prisma.websiteProject.create({
       data: {
         name:
@@ -72,7 +64,6 @@ export const createUserProject = async (req: Request, res: Response) => {
       },
     });
 
-    // 2️⃣ Save user message
     await prisma.conversation.create({
       data: {
         role: "user",
@@ -81,7 +72,6 @@ export const createUserProject = async (req: Request, res: Response) => {
       },
     });
 
-    // 3️⃣ Update stats
     await prisma.user.update({
       where: { id: userId },
       data: {
@@ -89,12 +79,8 @@ export const createUserProject = async (req: Request, res: Response) => {
       },
     });
 
-    // ✅ Respond immediately (IMPORTANT)
     res.status(200).json({ projectId: project.id });
 
-    // ===================================
-    // 🧠 SMART AI FALLBACK PIPELINE
-    // ===================================
     (async () => {
       const FALLBACK_MODELS = [
         "models/gemini-2.0-flash",
@@ -103,14 +89,8 @@ export const createUserProject = async (req: Request, res: Response) => {
       ];
       let lastError: any = null;
 
-      console.log("🚀 AI START:", project.id);
-
       for (const modelId of FALLBACK_MODELS) {
         try {
-          console.log(`🤖 Attempting generation with: ${modelId}`);
-          console.log(`💾 OPTIMIZATIONS ENABLED: prompt-caching + compressed-prompt`);
-
-          // ✅ OPTIMIZATION 1 & 2: Compressed & Streamlined Prompt (saves ~250 tokens)
           const systemPrompt = `Expert web dev: Create a multi-page SPA with hash routing. Return ONLY JSON:
 {"enhancedPrompt": "detailed version", "htmlCode": "complete HTML"}
 
@@ -135,13 +115,11 @@ CRITICAL FOR COMPLETION:
                 role: "user",
                 parts: [
                   {
-                    // ✅ OPTIMIZATION 3: Enable Prompt Caching (50-90% discount on repeated tokens)
                     text: systemPrompt + `\n\nUser request: "${initial_prompt}"\n\nGenerate complete working website NOW.`,
                   }
                 ]
               }
             ],
-            // ✅ Cache config for repeated prompts (next 100 requests get cached version)
             cachedContent: {
               enabled: true,
               ttlSeconds: 3600 // 1 hour cache
@@ -165,13 +143,11 @@ CRITICAL FOR COMPLETION:
 
           if (!htmlCode) throw new Error("Empty AI response");
 
-          // ✅ Validate HTML structure before saving
           const isValidWebsite = validateWebsiteCode(htmlCode);
           if (!isValidWebsite) {
             throw new Error("Invalid website structure - missing required HTML/router elements");
           }
 
-          // 1️⃣ Save Enhanced Prompt record
           await prisma.conversation.create({
             data: {
               role: "assistant",
@@ -180,23 +156,19 @@ CRITICAL FOR COMPLETION:
             },
           });
 
-          // 2️⃣ Save success status message
           await prisma.conversation.create({
             data: {
               role: "assistant",
-              content: "Website created successfully 🚀",
+              content: "Website created successfully",
               projectId: project.id,
             },
           });
-
-          console.log("⚡ Saving generated code...");
 
           const cleanCode = htmlCode
             .replace(/```[a-z]*\n?/gi, "")
             .replace(/```$/g, "")
             .trim();
 
-          // 3️⃣ Save version
           const version = await prisma.version.create({
             data: {
               code: cleanCode,
@@ -205,7 +177,6 @@ CRITICAL FOR COMPLETION:
             },
           });
 
-          // 4️⃣ Update project
           await prisma.websiteProject.update({
             where: { id: project.id },
             data: {
@@ -214,12 +185,11 @@ CRITICAL FOR COMPLETION:
             },
           });
 
-          console.log("✅ AI DONE:", project.id, "using", modelId);
           return; // EXIT LOOP ON SUCCESS
 
         } catch (err: any) {
           lastError = err;
-          console.warn(`⚠️ Model ${modelId} failed:`, err.status || err.message);
+          console.warn(`Model ${modelId} failed:`, err.status || err.message);
           
           // Only continue to fallback if it's a quota error (429) or model-not-found (404)
           if (err.status !== 429 && err.status !== 404) {
@@ -229,7 +199,7 @@ CRITICAL FOR COMPLETION:
       }
 
       // If we reach here, all models failed
-      console.error("🔥 ALL AI MODELS FAILED:", lastError);
+      console.error("ALL AI MODELS FAILED:", lastError);
 
       const isQuotaError = lastError?.status === 429;
       const errorMessage = isQuotaError
@@ -252,10 +222,6 @@ CRITICAL FOR COMPLETION:
   }
 };
 
-
-// ==============================
-// GET SINGLE PROJECT
-// ==============================
 export const getUserProject = async (req: Request, res: Response) => {
   try {
     const userId = req.userId;
@@ -282,10 +248,6 @@ export const getUserProject = async (req: Request, res: Response) => {
   }
 };
 
-
-// ==============================
-// GET ALL PROJECTS
-// ==============================
 export const getUserProjects = async (req: Request, res: Response) => {
   try {
     const userId = req.userId;
@@ -385,9 +347,6 @@ export const getThumbnailbyId = async (req: Request, res: Response)=>{
   }
 }
 
-// ==============================
-// CHECK PROJECT STATUS (for polling)
-// ==============================
 export const checkProjectStatus = async (req: Request, res: Response) => {
   try {
     const userId = req.userId;
