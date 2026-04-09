@@ -6,7 +6,7 @@
 /*
  * This file exports the `Thumbnail` model and its related types.
  *
- * You can import this file directly.
+ * 🟢 You can import this file directly.
  */
 import type * as runtime from "@prisma/client/runtime/client"
 import type * as $Enums from "../enums.js"
@@ -32,7 +32,7 @@ export type ThumbnailMinAggregateOutputType = {
   style: string | null
   aspect_ratio: string | null
   color_scheme: string | null
-  text_overlay: boolean | null
+  text_overlay: string | null
   image_url: string | null
   prompt_used: string | null
   user_prompt: string | null
@@ -49,7 +49,7 @@ export type ThumbnailMaxAggregateOutputType = {
   style: string | null
   aspect_ratio: string | null
   color_scheme: string | null
-  text_overlay: boolean | null
+  text_overlay: string | null
   image_url: string | null
   prompt_used: string | null
   user_prompt: string | null
@@ -209,7 +209,7 @@ export type ThumbnailGroupByOutputType = {
   style: string
   aspect_ratio: string
   color_scheme: string | null
-  text_overlay: boolean
+  text_overlay: string
   image_url: string
   prompt_used: string | null
   user_prompt: string | null
@@ -247,7 +247,7 @@ export type ThumbnailWhereInput = {
   style?: Prisma.StringFilter<"Thumbnail"> | string
   aspect_ratio?: Prisma.StringFilter<"Thumbnail"> | string
   color_scheme?: Prisma.StringNullableFilter<"Thumbnail"> | string | null
-  text_overlay?: Prisma.BoolFilter<"Thumbnail"> | boolean
+  text_overlay?: Prisma.StringFilter<"Thumbnail"> | string
   image_url?: Prisma.StringFilter<"Thumbnail"> | string
   prompt_used?: Prisma.StringNullableFilter<"Thumbnail"> | string | null
   user_prompt?: Prisma.StringNullableFilter<"Thumbnail"> | string | null
@@ -286,7 +286,7 @@ export type ThumbnailWhereUniqueInput = Prisma.AtLeast<{
   style?: Prisma.StringFilter<"Thumbnail"> | string
   aspect_ratio?: Prisma.StringFilter<"Thumbnail"> | string
   color_scheme?: Prisma.StringNullableFilter<"Thumbnail"> | string | null
-  text_overlay?: Prisma.BoolFilter<"Thumbnail"> | boolean
+  text_overlay?: Prisma.StringFilter<"Thumbnail"> | string
   image_url?: Prisma.StringFilter<"Thumbnail"> | string
   prompt_used?: Prisma.StringNullableFilter<"Thumbnail"> | string | null
   user_prompt?: Prisma.StringNullableFilter<"Thumbnail"> | string | null
@@ -327,7 +327,7 @@ export type ThumbnailScalarWhereWithAggregatesInput = {
   style?: Prisma.StringWithAggregatesFilter<"Thumbnail"> | string
   aspect_ratio?: Prisma.StringWithAggregatesFilter<"Thumbnail"> | string
   color_scheme?: Prisma.StringNullableWithAggregatesFilter<"Thumbnail"> | string | null
-  text_overlay?: Prisma.BoolWithAggregatesFilter<"Thumbnail"> | boolean
+  text_overlay?: Prisma.StringWithAggregatesFilter<"Thumbnail"> | string
   image_url?: Prisma.StringWithAggregatesFilter<"Thumbnail"> | string
   prompt_used?: Prisma.StringNullableWithAggregatesFilter<"Thumbnail"> | string | null
   user_prompt?: Prisma.StringNullableWithAggregatesFilter<"Thumbnail"> | string | null
@@ -343,7 +343,7 @@ export type ThumbnailCreateInput = {
   style: string
   aspect_ratio?: string
   color_scheme?: string | null
-  text_overlay?: boolean
+  text_overlay?: string
   image_url?: string
   prompt_used?: string | null
   user_prompt?: string | null
@@ -361,7 +361,7 @@ export type ThumbnailUncheckedCreateInput = {
   style: string
   aspect_ratio?: string
   color_scheme?: string | null
-  text_overlay?: boolean
+  text_overlay?: string
   image_url?: string
   prompt_used?: string | null
   user_prompt?: string | null
@@ -377,7 +377,7 @@ export type ThumbnailUpdateInput = {
   style?: Prisma.StringFieldUpdateOperationsInput | string
   aspect_ratio?: Prisma.StringFieldUpdateOperationsInput | string
   color_scheme?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  text_overlay?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  text_overlay?: Prisma.StringFieldUpdateOperationsInput | string
   image_url?: Prisma.StringFieldUpdateOperationsInput | string
   prompt_used?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   user_prompt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -395,7 +395,7 @@ export type ThumbnailUncheckedUpdateInput = {
   style?: Prisma.StringFieldUpdateOperationsInput | string
   aspect_ratio?: Prisma.StringFieldUpdateOperationsInput | string
   color_scheme?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  text_overlay?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  text_overlay?: Prisma.StringFieldUpdateOperationsInput | string
   image_url?: Prisma.StringFieldUpdateOperationsInput | string
   prompt_used?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   user_prompt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -412,7 +412,7 @@ export type ThumbnailCreateManyInput = {
   style: string
   aspect_ratio?: string
   color_scheme?: string | null
-  text_overlay?: boolean
+  text_overlay?: string
   image_url?: string
   prompt_used?: string | null
   user_prompt?: string | null
@@ -428,7 +428,7 @@ export type ThumbnailUpdateManyMutationInput = {
   style?: Prisma.StringFieldUpdateOperationsInput | string
   aspect_ratio?: Prisma.StringFieldUpdateOperationsInput | string
   color_scheme?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  text_overlay?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  text_overlay?: Prisma.StringFieldUpdateOperationsInput | string
   image_url?: Prisma.StringFieldUpdateOperationsInput | string
   prompt_used?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   user_prompt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -445,7 +445,7 @@ export type ThumbnailUncheckedUpdateManyInput = {
   style?: Prisma.StringFieldUpdateOperationsInput | string
   aspect_ratio?: Prisma.StringFieldUpdateOperationsInput | string
   color_scheme?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  text_overlay?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  text_overlay?: Prisma.StringFieldUpdateOperationsInput | string
   image_url?: Prisma.StringFieldUpdateOperationsInput | string
   prompt_used?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   user_prompt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -564,7 +564,7 @@ export type ThumbnailCreateWithoutUserInput = {
   style: string
   aspect_ratio?: string
   color_scheme?: string | null
-  text_overlay?: boolean
+  text_overlay?: string
   image_url?: string
   prompt_used?: string | null
   user_prompt?: string | null
@@ -580,7 +580,7 @@ export type ThumbnailUncheckedCreateWithoutUserInput = {
   style: string
   aspect_ratio?: string
   color_scheme?: string | null
-  text_overlay?: boolean
+  text_overlay?: string
   image_url?: string
   prompt_used?: string | null
   user_prompt?: string | null
@@ -626,7 +626,7 @@ export type ThumbnailScalarWhereInput = {
   style?: Prisma.StringFilter<"Thumbnail"> | string
   aspect_ratio?: Prisma.StringFilter<"Thumbnail"> | string
   color_scheme?: Prisma.StringNullableFilter<"Thumbnail"> | string | null
-  text_overlay?: Prisma.BoolFilter<"Thumbnail"> | boolean
+  text_overlay?: Prisma.StringFilter<"Thumbnail"> | string
   image_url?: Prisma.StringFilter<"Thumbnail"> | string
   prompt_used?: Prisma.StringNullableFilter<"Thumbnail"> | string | null
   user_prompt?: Prisma.StringNullableFilter<"Thumbnail"> | string | null
@@ -642,7 +642,7 @@ export type ThumbnailCreateManyUserInput = {
   style: string
   aspect_ratio?: string
   color_scheme?: string | null
-  text_overlay?: boolean
+  text_overlay?: string
   image_url?: string
   prompt_used?: string | null
   user_prompt?: string | null
@@ -658,7 +658,7 @@ export type ThumbnailUpdateWithoutUserInput = {
   style?: Prisma.StringFieldUpdateOperationsInput | string
   aspect_ratio?: Prisma.StringFieldUpdateOperationsInput | string
   color_scheme?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  text_overlay?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  text_overlay?: Prisma.StringFieldUpdateOperationsInput | string
   image_url?: Prisma.StringFieldUpdateOperationsInput | string
   prompt_used?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   user_prompt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -674,7 +674,7 @@ export type ThumbnailUncheckedUpdateWithoutUserInput = {
   style?: Prisma.StringFieldUpdateOperationsInput | string
   aspect_ratio?: Prisma.StringFieldUpdateOperationsInput | string
   color_scheme?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  text_overlay?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  text_overlay?: Prisma.StringFieldUpdateOperationsInput | string
   image_url?: Prisma.StringFieldUpdateOperationsInput | string
   prompt_used?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   user_prompt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -690,7 +690,7 @@ export type ThumbnailUncheckedUpdateManyWithoutUserInput = {
   style?: Prisma.StringFieldUpdateOperationsInput | string
   aspect_ratio?: Prisma.StringFieldUpdateOperationsInput | string
   color_scheme?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  text_overlay?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  text_overlay?: Prisma.StringFieldUpdateOperationsInput | string
   image_url?: Prisma.StringFieldUpdateOperationsInput | string
   prompt_used?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   user_prompt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -796,7 +796,7 @@ export type $ThumbnailPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     style: string
     aspect_ratio: string
     color_scheme: string | null
-    text_overlay: boolean
+    text_overlay: string
     image_url: string
     prompt_used: string | null
     user_prompt: string | null
@@ -1234,7 +1234,7 @@ export interface ThumbnailFieldRefs {
   readonly style: Prisma.FieldRef<"Thumbnail", 'String'>
   readonly aspect_ratio: Prisma.FieldRef<"Thumbnail", 'String'>
   readonly color_scheme: Prisma.FieldRef<"Thumbnail", 'String'>
-  readonly text_overlay: Prisma.FieldRef<"Thumbnail", 'Boolean'>
+  readonly text_overlay: Prisma.FieldRef<"Thumbnail", 'String'>
   readonly image_url: Prisma.FieldRef<"Thumbnail", 'String'>
   readonly prompt_used: Prisma.FieldRef<"Thumbnail", 'String'>
   readonly user_prompt: Prisma.FieldRef<"Thumbnail", 'String'>

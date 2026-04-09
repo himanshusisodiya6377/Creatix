@@ -5,50 +5,249 @@ import path from 'node:path';
 import fs from 'fs';
 import {v2 as cloudinary} from 'cloudinary';
 
-const stylePrompts = {
-  'Bold & Graphic': 'eye-catching thumbnail, bold typography, vibrant colors, expressive facial reaction, dramatic lighting, high contrast, click-worthy composition, professional style',
-  'Tech/Futuristic': 'futuristic thumbnail, sleek modern design, digital UI elements, glowing accents, holographic effects, cyber-tech aesthetic, sharp lighting, high-tech atmosphere',
-  'Minimalist': 'minimalist thumbnail, clean layout, simple shapes, limited color palette, plenty of negative space, modern flat design, clear focal point',
-  'Photorealistic': 'photorealistic thumbnail, ultra-realistic lighting, natural skin tones, candid moment, DSLR-style photography, lifestyle realism, shallow depth of field',
-  'Illustrated': 'illustrated thumbnail, custom digital illustration, stylized characters, bold outlines, vibrant colors, creative cartoon or vector art style',
+// ============================================
+// DYNAMIC THUMBNAIL PROMPT SYSTEM
+// ============================================
+
+interface ThumbnailAnalysis {
+  mainSubject: string;
+  emotionalTone: string;
+  contextualScenario: string;
+  targetAudience: string;
+  visualElements: string[];
+  ctrFactors: string[];
 }
 
-const colorSchemeDescriptions = {
-  vibrant: 'vibrant and energetic colors, high saturation, bold contrasts, eye-catching palette',
-  sunset: 'warm sunset tones, orange pink and purple hues, soft gradients, cinematic glow',
-  forest: 'natural green tones, earthy colors, calm and organic palette, fresh atmosphere',
-  neon: 'neon glow effects, electric blues and pinks, cyberpunk lighting, high contrast glow',
-  purple: 'purple-dominant color palette, magenta and violet tones, modern and stylish mood',
-  monochrome: 'black and white color scheme, high contrast, dramatic lighting, timeless aesthetic',
-  ocean: 'cool blue and teal tones, aquatic color palette, fresh and clean atmosphere',
-  pastel: 'soft pastel colors, low saturation, gentle tones, calm and friendly aesthetic',
+interface ThumbnailConcept {
+  titleIdea: string;
+  visualSceneDescription: string;
+  subjectDetails: string;
+  backgroundColors: string;
+  textOverlay: string;
+  style: string;
+  fullPrompt: string;
+}
+
+// Deep analysis of user input to extract key elements
+function analyzeUserInput(title: string, userPrompt: string): ThumbnailAnalysis {
+  const combinedText = `${title} ${userPrompt}`.toLowerCase();
+
+  // Emotion detection
+  const emotionMap: Record<string, string[]> = {
+    excitement: ['excited', 'wow', 'amazing', 'shocking', 'explosive', 'mind-blowing', 'insane', 'epic', 'crazy', 'unbelievable'],
+    curiosity: ['mystery', 'secret', 'hidden', 'reveal', 'discover', 'unknown', 'question', 'what if', 'uncovered'],
+    fear: ['scary', 'horror', 'dark', 'danger', 'eerie', 'terrifying', 'threat', 'panic'],
+    joy: ['happy', 'fun', 'laugh', 'celebration', 'cheerful', 'smile', 'party', 'entertaining'],
+    urgency: ['fast', 'quick', 'limited', 'exclusive', 'now', 'today', 'hurry', 'rare', 'rare opportunity'],
+    aspiration: ['dream', 'goal', 'achieve', 'success', 'transform', 'master', 'pro', 'expert', 'level up'],
+    authority: ['power', 'strong', 'leadership', 'command', 'dominate', 'control', 'ultimate'],
+    satisfaction: ['satisfying', 'calming', 'relaxing', 'asmr', 'peaceful', 'zen'],
+  };
+
+  let emotionalTone = 'dynamic';
+  for (const [emotion, keywords] of Object.entries(emotionMap)) {
+    if (keywords.some(kw => combinedText.includes(kw))) {
+      emotionalTone = emotion;
+      break;
+    }
+  }
+
+  // Extract main subject
+  const subjectIndicators = combinedText.split(' ').filter(w => w.length > 4);
+  const mainSubject = subjectIndicators[0] || 'content showcase';
+
+  // Context detection
+  const contextMap: Record<string, string[]> = {
+    product: ['product', 'review', 'unboxing', 'test', 'gear', 'device', 'item'],
+    gaming: ['game', 'gaming', 'stream', 'esports', 'gameplay', 'gamer'],
+    tutorial: ['tutorial', 'learn', 'guide', 'how to', 'lesson', 'teach'],
+    entertainment: ['funny', 'comedy', 'prank', 'comedy', 'entertaining', 'hilarious'],
+    transformation: ['transform', 'before after', 'makeover', 'changed', 'journey'],
+    challenge: ['challenge', 'attempt', 'test', 'try', 'beat', 'vs'],
+    vlog: ['vlog', 'day', 'life', 'lifestyle', 'routine', 'daily'],
+  };
+
+  let contextualScenario = 'general content';
+  for (const [context, keywords] of Object.entries(contextMap)) {
+    if (keywords.some(kw => combinedText.includes(kw))) {
+      contextualScenario = context;
+      break;
+    }
+  }
+
+  // Target audience inference
+  const audienceMap: Record<string, string[]> = {
+    young: ['teens', 'kids', 'youth', 'gaming', 'meme', 'trending'],
+    professional: ['business', 'corporate', 'professional', 'finance', 'enterprise'],
+    educational: ['learn', 'science', 'education', 'explained', 'research'],
+    entertainment: ['funny', 'comedy', 'entertainment', 'streaming', 'vlog'],
+    enthusiasts: ['review', 'tech', 'gear', 'hardcore', 'expert', 'pro'],
+  };
+
+  let targetAudience = 'content creators';
+  for (const [audience, keywords] of Object.entries(audienceMap)) {
+    if (keywords.some(kw => combinedText.includes(kw))) {
+      targetAudience = audience + ' audience';
+      break;
+    }
+  }
+
+  // Extract visual elements from description
+  const visualKeywords = ['cinematic', 'dramatic', 'vibrant', 'dark', 'bright', 'glossy', 'minimalist', '3d', 'cartoon', 'realistic'];
+  const visualElements = visualKeywords.filter(kw => combinedText.includes(kw));
+
+  // CTR factors
+  const ctrFactors: string[] = [];
+  if (combinedText.includes('shocking') || combinedText.includes('wow')) ctrFactors.push('shock value');
+  if (combinedText.includes('mystery') || combinedText.includes('secret')) ctrFactors.push('curiosity gap');
+  if (combinedText.includes('fail') || combinedText.includes('epic')) ctrFactors.push('emotional reaction');
+  if (combinedText.includes('test') || combinedText.includes('vs')) ctrFactors.push('comparison element');
+  if (emotionalTone === 'urgency') ctrFactors.push('scarcity/urgency');
+
+  return {
+    mainSubject: title.substring(0, 50),
+    emotionalTone,
+    contextualScenario,
+    targetAudience,
+    visualElements: visualElements.length > 0 ? visualElements : ['dynamic', 'professional'],
+    ctrFactors: ctrFactors.length > 0 ? ctrFactors : ['visual impact', 'curiosity', 'engagement'],
+  };
+}
+
+// Generate a highly detailed, unique thumbnail concept
+function generateDynamicThumbnailConcept(
+  title: string,
+  userPrompt: string,
+  userStyle: string,
+  colorScheme: string,
+  aspectRatio: string,
+  textOverlay: string
+): ThumbnailConcept {
+  const analysis = analyzeUserInput(title, userPrompt);
+
+  console.log('\n========== THUMBNAIL CONCEPT ANALYSIS ==========');
+  console.log(`Main Subject: ${analysis.mainSubject}`);
+  console.log(`Emotional Tone: ${analysis.emotionalTone}`);
+  console.log(`Context: ${analysis.contextualScenario}`);
+  console.log(`Target Audience: ${analysis.targetAudience}`);
+  console.log(`CTR Factors: ${analysis.ctrFactors.join(', ')}`);
+
+  // Generate dynamic visual scene based on analysis
+  const sceneDescriptions: Record<string, string> = {
+    excitement: 'explosive energy with dynamic movement and sharp focus, intense action in the moment',
+    curiosity: 'intrigue-driven composition with layered depth, mysterious shadows, hidden revelations',
+    fear: 'tension-filled atmosphere with ominous lighting, dark undertones, sense of urgency and threat',
+    joy: 'bright uplifting energy, warm lighting, positive motion flowing outward, celebratory mood',
+    urgency: 'fast-paced composition with motion blur, sharp contrasts, time-sensitive visual cues',
+    aspiration: 'aspirational framing with subject elevated or centered, inspiring lighting, goal-oriented focus',
+    authority: 'commanding central positioning, dominant subject, powerful lighting from above or sides',
+    satisfaction: 'serene composition with meditative elements, smooth textures, calming color harmony',
+  };
+
+  const visualScene = sceneDescriptions[analysis.emotionalTone] || 'vibrant, engaging composition with clear focal point';
+
+  // Background and color strategy based on analysis and user selection
+  const colorGuide: Record<string, string> = {
+    vibrant: 'saturated, high-contrast colors that pop off screen, maximum visual impact',
+    sunset: 'warm gradient tones (orange to purple), cinematic glow with dramatic shadows',
+    forest: 'natural earth tones with organic textures, calming green-brown palette',
+    neon: 'electric neon accents (cyan, pink, magenta) against deep blacks for cyberpunk feel',
+    purple: 'rich purples and magentas creating modern, sophisticated atmosphere',
+    monochrome: 'high-contrast black and white with dramatic lighting creating depth',
+    ocean: 'cool blues and teals with aquatic atmosphere and flowing movement',
+    pastel: 'soft, muted tones with gentle transitions, friendly approachable feel',
+  };
+
+  const backgroundDescription = colorGuide[colorScheme as keyof typeof colorGuide] || 'dynamic, visually striking color palette';
+
+  // Use user-provided text overlay, fallback to title if not provided
+  const displayText = (textOverlay && typeof textOverlay === 'string' ? textOverlay.trim() : '') || title.substring(0, 15);
+  const textOverlayFinal = displayText.substring(0, 50);
+
+  // Style determiner
+  const styleMap: Record<string, string> = {
+    'Bold & Graphic': 'bold, high-contrast, graphic design style with strong typography',
+    'Tech/Futuristic': 'futuristic, sleek, digital aesthetic with modern tech elements',
+    'Minimalist': 'clean minimalist design, spacious composition, elegant simplicity',
+    'Photorealistic': 'photorealistic, ultra-detailed, professional photography quality',
+    'Illustrated': 'illustrated art style, creative, artistic hand-painted quality',
+  };
+
+  const styleDescription = styleMap[userStyle as keyof typeof styleMap] || 'visually striking modern style';
+
+  // Build comprehensive full prompt for AI
+  const fullPrompt = `Create an absolutely stunning, high-impact thumbnail that MUST capture attention immediately.
+
+ANALYSIS-BASED REQUIREMENTS:
+- Main focus: ${analysis.mainSubject}
+- Emotional tone: ${analysis.emotionalTone}
+- Context: ${analysis.contextualScenario}
+- Target audience: ${analysis.targetAudience}
+- CTR factors to include: ${analysis.ctrFactors.join(', ')}
+
+VISUAL DIRECTION:
+- Scene composition: ${visualScene}
+- Color palette: ${backgroundDescription}
+- Overall style: ${styleDescription}
+- Aspect ratio: ${aspectRatio}
+
+CONTENT INSTRUCTIONS:
+${userPrompt ? `- Core content: ${userPrompt}` : ''}
+- Title text: "${title}"
+- Display text on thumbnail: EXACTLY "${textOverlayFinal}" - DO NOT MODIFY, CHANGE, SHORTEN, OR REPHRASE
+
+TEXT RENDERING (CRITICAL - HIGHEST PRIORITY):
+- RENDER EXACT TEXT: "${textOverlayFinal}"
+- TEXT MUST MATCH EXACTLY: "${textOverlayFinal}"
+- NO SPELLING CHANGES - render literally as written: "${textOverlayFinal}"
+- Font: Large, bold, high-contrast
+- Text should be visible even at small thumbnail size
+- Strategic placement that enhances overall composition
+- DO NOT truncate, change case, or modify the text in any way
+- THIS TEXT MUST APPEAR EXACTLY AS: "${textOverlayFinal}"
+
+THUMBNAIL OPTIMIZATION:
+- Designed for maximum CTR (click-through rate)
+- Visually impossible to ignore
+- Professional and polished quality
+- Unique, non-generic concept
+- Specific ${aspectRatio} format
+
+Make this thumbnail so visually striking that people MUST click it.`;
+
+  const concept: ThumbnailConcept = {
+    titleIdea: `${title} - ${analysis.emotionalTone.charAt(0).toUpperCase() + analysis.emotionalTone.slice(1)} Impact`,
+    visualSceneDescription: visualScene,
+    subjectDetails: `${analysis.mainSubject} with ${analysis.emotionalTone} energy, designed to appeal to ${analysis.targetAudience}`,
+    backgroundColors: backgroundDescription,
+    textOverlay: textOverlayFinal,
+    style: styleDescription,
+    fullPrompt: fullPrompt,
+  };
+
+  console.log('\n========== GENERATED CONCEPT ==========');
+  console.log(`Title Idea: ${concept.titleIdea}`);
+  console.log(`Visual Scene: ${concept.visualSceneDescription}`);
+  console.log(`Text Overlay: ${concept.textOverlay}`);
+  console.log(`Style: ${concept.style}`);
+  console.log('==========================================\n');
+
+  return concept;
 }
 
 // Background function to generate and upload the thumbnail
-const generateThumbnailAsync = async (thumbnailId: string, userId: string, title: string, user_prompt: string, style: string, aspect_ratio: string, color_scheme: string) => {
+const generateThumbnailAsync = async (thumbnailId: string, userId: string, title: string, user_prompt: string, style: string, aspect_ratio: string, color_scheme: string, text_overlay: string) => {
   try {
-    console.log(`\nBuilding prompt for thumbnail:`);
-    console.log(`  Style: ${style}`);
-    console.log(`  Color Scheme: ${color_scheme}`);
-    console.log(`  Aspect Ratio: ${aspect_ratio}`);
-    console.log(`  Title: ${title}`);
+    console.log(`\n========== STARTING THUMBNAIL GENERATION ==========`);
+    console.log(`Title: ${title}`);
+    console.log(`User Description: ${user_prompt}`);
+    console.log(`Style: ${style}`);
+    console.log(`Color Scheme: ${color_scheme}`);
+    console.log(`Aspect Ratio: ${aspect_ratio}`);
 
-    let prompt = `Create a ${stylePrompts[style as keyof typeof stylePrompts]} thumbnail for: "${title}"`;
-
-    if(color_scheme){
-      prompt += ` Use a ${colorSchemeDescriptions[color_scheme as keyof typeof colorSchemeDescriptions]} color scheme.`;
-    }
-
-    if(user_prompt){
-      prompt += ` Additional details: ${user_prompt}.`;
-    }
-
-    // Add clear text rendering instruction with emphasis on accuracy
-    prompt += ` CRITICAL: Display the exact text "${title}" prominently on the thumbnail in large, bold, highly readable letters.`;
-    prompt += ` TEXT MUST BE SPELLED CORRECTLY AND MATCH EXACTLY: "${title}". The text should have high contrast with the background for maximum readability.`;
-    prompt += ` The thumbnail should be ${aspect_ratio}, visually stunning, and designed to maximize click-through rate. Make it bold, professional, and impossible to ignore.`;
-    
-    console.log(`\nFinal Prompt:\n${prompt}\n`);
+    // Generate dynamic, adaptive thumbnail concept
+    const concept = generateDynamicThumbnailConcept(title, user_prompt, style, color_scheme, aspect_ratio, text_overlay);
+    const prompt = concept.fullPrompt;
 
     // Define exact dimensions for each aspect ratio to avoid stretching
     const dimensionMap: Record<string, { width: number; height: number }> = {
@@ -62,8 +261,8 @@ const generateThumbnailAsync = async (thumbnailId: string, userId: string, title
     const dimensions = dimensionMap[aspect_ratio] || dimensionMap['16:9'];
     const { width, height } = dimensions;
 
-    console.log(`Generating thumbnail with Clipdrop...`);
-    console.log(`  Dimensions: ${width}x${height} (Aspect Ratio: ${aspect_ratio})`);
+    console.log(`\nGenerating image with Clipdrop...`);
+    console.log(`Dimensions: ${width}x${height} (Aspect Ratio: ${aspect_ratio})`);
     
     // Generate the image using Clipdrop
     const imageBuffer = await generateImageWithClipdrop({
@@ -98,9 +297,9 @@ const generateThumbnailAsync = async (thumbnailId: string, userId: string, title
 
     // Remove image file from disk
     fs.unlinkSync(filePath)
-    console.log(`Thumbnail ${thumbnailId} generated successfully`)
+    console.log(`✅ Thumbnail ${thumbnailId} generated successfully`)
   } catch (error) {
-    console.error(`Error generating thumbnail ${thumbnailId}:`, error);
+    console.error(`❌ Error generating thumbnail ${thumbnailId}:`, error);
     // Delete the thumbnail record if generation failed (only save successful ones)
     await prisma.thumbnail.deleteMany({
       where: { id: thumbnailId }
@@ -135,7 +334,7 @@ export const generateThumbnail = async (req: Request, res: Response) => {
     })
 
     // Start generation in the background (don't await)
-    generateThumbnailAsync(thumbnail.id, userId, title, user_prompt, style, aspect_ratio, color_scheme)
+    generateThumbnailAsync(thumbnail.id, userId, title, user_prompt, style, aspect_ratio, color_scheme, text_overlay)
       .catch(error => console.error('Background generation error:', error));
 
     // Respond immediately with the thumbnail ID
