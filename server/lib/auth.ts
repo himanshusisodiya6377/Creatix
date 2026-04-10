@@ -26,8 +26,8 @@ export const auth = betterAuth({
         name: 'auth_session',
         attributes: {
           httpOnly: true,
-          secure: process.env.NODE_ENV === 'production', //if true can travel https
-          sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+          secure: true,       // always required for cross-domain
+          sameSite: 'none',   // always required for cross-domain
           path: '/', 
         },
       },
