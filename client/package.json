@@ -23,7 +23,6 @@
     "react-hot-toast": "^2.6.0",
     "react-router-dom": "^7.13.0",
     "sonner": "^2.0.7",
-    "sooner": "^1.1.4",
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^4.1.18"
   },
