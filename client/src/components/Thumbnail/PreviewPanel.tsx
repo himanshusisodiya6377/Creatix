@@ -1,15 +1,23 @@
 import { DownloadIcon, ImageIcon, Loader2Icon } from "lucide-react";
 import type { AspectRatio, IThumbnail } from "../../assets/assets_thumb"
+import api from "../../configs/axios";
+import { toast } from "react-hot-toast";
 
 const PreviewPanel = ({thumbnail, isLoading, aspectRatio} : {thumbnail: IThumbnail | null, isLoading: boolean; aspectRatio: AspectRatio}) => {
    
-const onDownload = ()=>{
-  if(!thumbnail?.image_url) return;
-  const link = document.createElement('a');
-  link.href = thumbnail?.image_url.replace('/upload', '/upload/fl_attachment')
-  document.body.appendChild(link);
-  link.click()
-  link.remove()
+const onDownload = async ()=>{
+  if(!thumbnail?.id) {
+    toast.error('Thumbnail ID not found');
+    return;
+  }
+  
+  try {
+    // Use the download endpoint which handles the redirect
+    window.open(`${api.defaults.baseURL}/api/thumbnail/download/${thumbnail.id}`, '_blank');
+  } catch (error) {
+    console.error('Download error:', error);
+    toast.error('Failed to download thumbnail');
+  }
 }
 
   const aspectClasses = {
