@@ -1,6 +1,6 @@
 import api from '@/configs/axios';
 import { authClient } from '@/lib/auth-client';
-import { Loader2Icon, Globe, ImageIcon, SparklesIcon, ArrowRightIcon, CodeIcon, ZapIcon, Figma, Square, Camera, ShoppingCart, MessageSquare, Zap, Eye, Smartphone, Lock, Cpu, GitBranch, Users, Palette, ChevronDown } from 'lucide-react';
+import { Loader2Icon, Globe, ImageIcon, SparklesIcon, ArrowRightIcon, CodeIcon, ZapIcon, Figma, Square, Camera, ShoppingCart, MessageSquare, Zap, Eye, Smartphone, Cpu, GitBranch, Users, Palette, ChevronDown } from 'lucide-react';
 import React, { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';

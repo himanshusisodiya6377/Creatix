@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { assets } from '../assets/assets';
+import { useState } from 'react'
+// assets removed
 import { Link, useNavigate } from 'react-router-dom';
 import {authClient} from "../lib/auth-client"
 import { UserButton } from '@daveyplate/better-auth-ui';
