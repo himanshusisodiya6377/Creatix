@@ -1,15 +1,29 @@
 import api from '@/configs/axios';
 import { authClient } from '@/lib/auth-client';
-import { Loader2Icon, Globe, ImageIcon, SparklesIcon, ArrowRightIcon, CodeIcon, ZapIcon, Figma, Square, Camera, ShoppingCart, MessageSquare, Zap, Eye, Smartphone, Lock, Cpu, GitBranch, Users, Palette } from 'lucide-react';
-import React, { useState } from 'react'
+import { Loader2Icon, Globe, ImageIcon, SparklesIcon, ArrowRightIcon, CodeIcon, ZapIcon, Figma, Square, Camera, ShoppingCart, MessageSquare, Zap, Eye, Smartphone, Lock, Cpu, GitBranch, Users, Palette, ChevronDown } from 'lucide-react';
+import React, { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+
+const MODELS = [
+  { id: 'llama-3.3-70b-versatile', name: 'Llama 3.3 70B', icon: '🧠', badge: 'Reasoning', description: 'Best for logic & code.' },
+  { id: 'openai/gpt-oss-120b', name: 'GPT-OSS 120B', icon: '⚡', badge: 'Power', description: 'Highest parameter count.' },
+  { id: 'qwen/qwen3-32b', name: 'Qwen 3 32B', icon: '🎨', badge: 'Frontend', description: 'Great for CSS & UI.' },
+  { id: 'moonshotai/kimi-k2-instruct-0905', name: 'Kimi K2', icon: '📥', badge: '262k Ctx', description: 'Massive context window.' },
+  { id: 'meta-llama/llama-4-scout-17b-16e-instruct', name: 'Llama 4 Scout', icon: '🎯', badge: 'Precision', description: 'Accurate instructions.' },
+  { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', icon: '🚀', badge: 'Fastest', description: 'Speed & Reliability.' },
+  { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', icon: '🤖', badge: 'Backup', description: 'Stable performance.' },
+];
 
 const Home = () => {
   const { data: session } = authClient.useSession();
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [activeCard, setActiveCard] = useState<'website' | 'thumbnail' | null>(null);
+  const [selectedModel, setSelectedModel] = useState(MODELS[0].id);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const currentProjectIdRef = useRef<string | null>(null);
   const navigate = useNavigate();
 
   const onSubmitHandler = async (e: React.FormEvent) => {
@@ -21,16 +35,54 @@ const Home = () => {
       else if (!input.trim()) {
         return toast.error('Please describe your website');
       }
+      
       setLoading(true);
-      const { data } = await api.post('/api/user/project', { initial_prompt: input });
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+
+      const { data } = await api.post('/api/user/project', 
+        { 
+          initial_prompt: input,
+          model: selectedModel 
+        },
+        { signal: controller.signal }
+      );
+      
+      currentProjectIdRef.current = data.projectId;
+      
       setLoading(false);
+      abortControllerRef.current = null;
       toast.success('Project created! Generating website...');
       navigate(`/project/${data.projectId}`);
     } catch (error: any) {
+      if (error.name === 'CanceledError' || error.name === 'AbortError') {
+        console.log('Generation cancelled by user');
+        return;
+      }
       setLoading(false);
+      abortControllerRef.current = null;
       toast.error(error?.response?.data?.message || error.message);
       console.log(error);
     }
+  };
+
+  const cancelGeneration = async () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    
+    if (currentProjectIdRef.current) {
+      try {
+        await api.post(`/api/user/project/cancel/${currentProjectIdRef.current}`);
+      } catch (err) {
+        console.error('Failed to cancel on server:', err);
+      }
+    }
+
+    setLoading(false);
+    abortControllerRef.current = null;
+    currentProjectIdRef.current = null;
+    toast.info('Generation cancelled');
   };
 
   const handleThumbnailClick = () => {
@@ -120,17 +172,96 @@ const Home = () => {
                     className="w-full bg-black/30 border border-white/10 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 rounded-xl px-4 py-3 text-sm text-gray-200 placeholder:text-gray-500 outline-none resize-none transition-all"
                   />
                 </div>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-medium py-3 rounded-xl transition-all active:scale-95"
-                >
-                  {loading ? (
-                    <>Generating <Loader2Icon className="size-4 animate-spin" /></>
-                  ) : (
-                    <><CodeIcon className="size-4" /> Generate Website</>
+                {/* Model Selection Dropdown */}
+                <div className="space-y-2 mb-4">
+                  <label className="text-[10px] font-bold text-emerald-400/70 uppercase tracking-[0.2em] ml-1">AI Engine</label>
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                      className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-black/40 border border-white/10 hover:border-emerald-500/40 transition-all duration-300 group selection-none"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-xl">{MODELS.find(m => m.id === selectedModel)?.icon}</span>
+                        <div className="text-left">
+                          <div className="text-sm font-semibold text-white flex items-center gap-2">
+                             {MODELS.find(m => m.id === selectedModel)?.name}
+                             <span className="text-[9px] bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-500/20 uppercase tracking-tighter">
+                               {MODELS.find(m => m.id === selectedModel)?.badge}
+                             </span>
+                          </div>
+                          <p className="text-[10px] text-gray-500 line-clamp-1">{MODELS.find(m => m.id === selectedModel)?.description}</p>
+                        </div>
+                      </div>
+                      <ChevronDown className={`size-4 text-gray-500 transition-transform duration-300 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {isDropdownOpen && (
+                      <>
+                        {/* Backdrop to close */}
+                        <div className="fixed inset-0 z-40" onClick={() => setIsDropdownOpen(false)} />
+                        
+                        <div className="absolute bottom-full mb-2 left-0 right-0 z-50 bg-gray-900/95 backdrop-blur-xl border border-white/10 rounded-2xl p-2 shadow-2xl animate-in fade-in slide-in-from-bottom-2 duration-200">
+                          <div className="max-h-64 overflow-y-auto custom-scrollbar space-y-1">
+                            {MODELS.map((model) => (
+                              <button
+                                key={model.id}
+                                type="button"
+                                onClick={() => {
+                                  setSelectedModel(model.id);
+                                  setIsDropdownOpen(false);
+                                }}
+                                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-left ${
+                                  selectedModel === model.id
+                                    ? 'bg-emerald-500/10 border border-emerald-500/20'
+                                    : 'hover:bg-white/5 border border-transparent'
+                                }`}
+                              >
+                                <span className="text-xl">{model.icon}</span>
+                                <div className="flex-1">
+                                  <div className="flex items-center justify-between">
+                                    <span className={`text-sm font-medium ${selectedModel === model.id ? 'text-emerald-400' : 'text-gray-200'}`}>
+                                      {model.name}
+                                    </span>
+                                    <span className="text-[9px] bg-white/5 text-gray-400 px-1.5 py-0.5 rounded uppercase tracking-tighter">
+                                      {model.badge}
+                                    </span>
+                                  </div>
+                                  <p className="text-[10px] text-gray-500 mt-0.5">{model.description}</p>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-medium py-3 rounded-xl transition-all active:scale-95"
+                  >
+                    {loading ? (
+                      <>Generating <Loader2Icon className="size-4 animate-spin" /></>
+                    ) : (
+                      <><CodeIcon className="size-4" /> Generate Website</>
+                    )}
+                  </button>
+                  
+                  {loading && (
+                    <button
+                      type="button"
+                      onClick={cancelGeneration}
+                      className="px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-all flex items-center justify-center"
+                      title="Cancel Generation"
+                    >
+                      <ZapIcon className="size-4 rotate-180" />
+                    </button>
                   )}
-                </button>
+                </div>
               </form>
             </div>
 

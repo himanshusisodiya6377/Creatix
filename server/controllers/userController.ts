@@ -1,45 +1,35 @@
 import { Request, Response } from "express";
 import prisma from "../lib/prisma.js";
-import ai from "../configs/ai.js";
+import aiService from "../lib/aiService.js";
+import { taskManager } from "../lib/taskManager.js";
 
 const validateWebsiteCode = (code: string): boolean => {
-  // Check for required HTML structure
-  if (!code.includes('<html') && !code.includes('<!DOCTYPE')) {
-    console.warn('Validation: Missing HTML structure');
-    return false;
-  }
-  
-  // Check for body tag
-  if (!code.includes('<body')) {
-    console.warn('Validation: Missing body tag');
-    return false;
-  }
-  
-  // Check for multi-page router pattern (pages object + addEventListener)
-  if (!code.includes('pages') || !code.includes('hashchange')) {
-    console.warn('Validation: Missing multi-page router pattern');
-    return false;
-  }
-  
-  // Check for at least one page link (hash navigation)
-  if (!/href\s*=\s*["']#\//g.test(code)) {
-    console.warn('Validation: Missing page navigation links');
-    return false;
+  const checks = [
+    { 
+      name: 'HTML/Doctype', 
+      test: () => code.includes('<html') || code.includes('<!DOCTYPE'),
+      error: 'Missing basic HTML structure or <!DOCTYPE>'
+    },
+    { 
+      name: 'Body Tag', 
+      test: () => code.includes('<body'),
+      error: 'Missing <body> tag' 
+    },
+    { 
+      name: 'Code Length', 
+      test: () => code.length >= 500,
+      error: 'Code too short (< 500 chars) - likely incomplete' 
+    }
+  ];
+
+  for (const check of checks) {
+    if (!check.test()) {
+      console.warn(`❌ Validation Failed [${check.name}]: ${check.error}`);
+      return false;
+    }
   }
 
-  // Check for Tailwind CSS
-  if (!code.includes('tailwindcss') && !code.includes('tailwind')) {
-    console.warn('Validation: Missing Tailwind CSS');
-    return false;
-  }
-
-  // Check minimum code length (valid website should be >1KB)
-  if (code.length < 1000) {
-    console.warn('Validation: Code too short - likely incomplete');
-    return false;
-  }
-
-  console.log('Validation passed - Website structure is valid');
+  console.log('✅ Validation passed - Website structure is valid');
   return true;
 };
 
@@ -47,7 +37,7 @@ export const createUserProject = async (req: Request, res: Response) => {
   const userId = req.userId;
 
   try {
-    const { initial_prompt } = req.body;
+    const { initial_prompt, model } = req.body;
 
     if (!userId) {
       return res.status(401).json({ message: "Unauthorized" });
@@ -82,137 +72,102 @@ export const createUserProject = async (req: Request, res: Response) => {
     res.status(200).json({ projectId: project.id });
 
     (async () => {
-      const FALLBACK_MODELS = [
-        "models/gemini-2.0-flash",
-        "models/gemini-2.5-flash",
-        "models/gemini-1.5-flash",
-      ];
-      let lastError: any = null;
+      try {
+        const controller = new AbortController();
+        taskManager.addTask(project.id, controller);
 
-      for (const modelId of FALLBACK_MODELS) {
-        try {
-          const systemPrompt = `Expert web dev: Create a multi-page SPA with hash routing. Return ONLY JSON:
-{"enhancedPrompt": "detailed version", "htmlCode": "complete HTML"}
-
-MUST: 5 pages (Home, About, Services, Pricing, Contact) + responsive nav with mobile menu
-TECH: Tailwind CSS, vanilla JS router, placehold.co images only, modern code
-STRUCTURE: pages object with functions returning HTML, addEventListener('hashchange')
-
-CRITICAL FOR COMPLETION:
-- ALL pages MUST be fully implemented with complete content (no placeholders)
-- EVERY page MUST have working navigation links to ALL other pages
-- Navigation links format: <a href="#/page-name"> for all 5 pages on every page
-- Footer MUST appear on every page with links to all pages
-- Mobile menu MUST work on ALL pages and show all page links
-- Each page function MUST return complete HTML, not partial code
-- Test all links work: clicking nav items must show correct page
-- NO missing or broken page links - ALL links must be functional`;
-
-          const result = await ai.models.generateContent({
-            model: modelId,
-            contents: [
-              {
-                role: "user",
-                parts: [
-                  {
-                    text: systemPrompt + `\n\nUser request: "${initial_prompt}"\n\nGenerate complete working website NOW.`,
-                  }
-                ]
-              }
-            ],
-            cachedContent: {
-              enabled: true,
-              ttlSeconds: 3600 // 1 hour cache
-            }
-          } as any);
-
-          const responseText = result.text || "";
-          let enhancedPrompt = initial_prompt;
-          let htmlCode = "";
-
-          try {
-            // Extract JSON if model wraps it in md fences
-            const jsonContent = responseText.replace(/```json\n?|```/g, "").trim();
-            const parsed = JSON.parse(jsonContent);
-            enhancedPrompt = parsed.enhancedPrompt || initial_prompt;
-            htmlCode = parsed.htmlCode || "";
-          } catch (e) {
-            console.error("Failed to parse AI JSON response, falling back to raw text.");
-            htmlCode = responseText;
-          }
-
-          if (!htmlCode) throw new Error("Empty AI response");
-
-          const isValidWebsite = validateWebsiteCode(htmlCode);
-          if (!isValidWebsite) {
-            throw new Error("Invalid website structure - missing required HTML/router elements");
-          }
-
-          await prisma.conversation.create({
-            data: {
-              role: "assistant",
-              content: `Enhanced prompt: ${enhancedPrompt}`,
-              projectId: project.id,
+        const responseText = await aiService.generateContent({
+          model,
+          signal: controller.signal,
+          contents: [
+            {
+              role: "user",
+              parts: [
+                {
+                  text: `Create a professional, minimalist, and lightweight SINGLE-PAGE website for: "${initial_prompt}"
+                  
+                  CRITICAL REQUIREMENTS:
+                  - Use VANILLA HTML, CSS, and JS ONLY.
+                  - NO Tailwind CSS. NO React. NO External Libraries (except for icons/fonts).
+                  - Use a single <style> tag for ALL beautiful, modern, and responsive CSS.
+                  - Use a single <script> tag for simple interactivity.
+                  - Return ONLY the complete HTML code. NO explanation. NO code fences.
+                  
+                  STRUCTURE & NAVIGATION:
+                  - Build a clean, vertical single-page layout.
+                  - Use Fragment IDs (e.g., id="about", id="work") for sections.
+                  - Navigation links MUST use the format: <a href="#about">About</a>.
+                  - The navbar and footer MUST be included in the single HTML document.
+                  - Use smooth-scrolling for a premium feel.
+                  
+                  DESIGN PHILOSOPHY:
+                  - Keep the code lightweight and simple (optimized for free AI models).
+                  - Focus on high-quality typography and clean minimalist aesthetics.`,
+                },
+              ],
             },
-          });
+          ],
+        });
 
-          await prisma.conversation.create({
-            data: {
-              role: "assistant",
-              content: "Website created successfully",
-              projectId: project.id,
-            },
-          });
+        const htmlCode = responseText.replace(/```[a-z]*\n?/gi, "").replace(/```$/g, "").trim();
+        const enhancedPrompt = initial_prompt;
 
-          const cleanCode = htmlCode
-            .replace(/```[a-z]*\n?/gi, "")
-            .replace(/```$/g, "")
-            .trim();
+        if (!htmlCode) throw new Error("Empty AI response");
 
-          const version = await prisma.version.create({
-            data: {
-              code: cleanCode,
-              description: "Initial Version",
-              projectId: project.id,
-            },
-          });
-
-          await prisma.websiteProject.update({
-            where: { id: project.id },
-            data: {
-              current_code: cleanCode,
-              current_version_index: version.id,
-            },
-          });
-
-          return; // EXIT LOOP ON SUCCESS
-
-        } catch (err: any) {
-          lastError = err;
-          console.warn(`Model ${modelId} failed:`, err.status || err.message);
-          
-          // Only continue to fallback if it's a quota error (429) or model-not-found (404)
-          if (err.status !== 429 && err.status !== 404) {
-            break; 
-          }
+        const isValidWebsite = validateWebsiteCode(htmlCode);
+        if (!isValidWebsite) {
+          throw new Error("Invalid website structure - missing required HTML/router elements");
         }
+
+        await prisma.conversation.create({
+          data: {
+            role: "assistant",
+            content: `Enhanced prompt: ${enhancedPrompt}`,
+            projectId: project.id,
+          },
+        });
+
+        await prisma.conversation.create({
+          data: {
+            role: "assistant",
+            content: "Website created successfully",
+            projectId: project.id,
+          },
+        });
+
+        const cleanCode = htmlCode
+          .trim();
+
+        const version = await prisma.version.create({
+          data: {
+            code: cleanCode,
+            description: "Initial Version",
+            projectId: project.id,
+          },
+        });
+
+        await prisma.websiteProject.update({
+          where: { id: project.id },
+          data: {
+            current_code: cleanCode,
+            current_version_index: version.id,
+          },
+        });
+
+        taskManager.removeTask(project.id);
+      } catch (err: any) {
+        console.error("AI GENERATION FAILED:", err);
+        taskManager.removeTask(project.id);
+        const errorMessage = err.message === 'Aborted' ? "Generation was cancelled." : (err.message || "Something went wrong while generating your website. Please check your API key.");
+        
+        await prisma.conversation.create({
+          data: {
+            role: "assistant",
+            content: errorMessage,
+            projectId: project.id,
+          },
+        });
       }
-
-      // If we reach here, all models failed
-      console.error("ALL AI MODELS FAILED:", lastError);
-
-      const isQuotaError = lastError?.status === 429;
-      const errorMessage = isQuotaError
-        ? "AI Quota limit reached (Free Tier). Please wait 60 seconds and try again."
-        : "Something went wrong while generating your website. Please check your API key.";
-
-      await prisma.conversation.create({
-        data: {
-          role: "assistant",
-          content: errorMessage,
-          projectId: project.id,
-        },
-      });
     })();
 
   } catch (error: any) {
@@ -375,6 +330,34 @@ export const checkProjectStatus = async (req: Request, res: Response) => {
 
   } catch (error: any) {
     console.error(error);
+    return res.status(500).json({ message: error.message });
+  }
+};
+export const cancelProjectGeneration = async (req: Request, res: Response) => {
+  const { projectId } = req.params;
+  const userId = req.userId;
+
+  try {
+    if (!userId) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    const cancelled = taskManager.cancelTask(projectId);
+    
+    // Update conversation to show it was cancelled
+    await prisma.conversation.create({
+      data: {
+        role: 'assistant',
+        content: 'Generation was cancelled by the user.',
+        projectId,
+      },
+    });
+
+    return res.status(200).json({ 
+      success: true, 
+      message: cancelled ? 'Generation cancelled successfully' : 'Task already completed or not found' 
+    });
+  } catch (error: any) {
     return res.status(500).json({ message: error.message });
   }
 };

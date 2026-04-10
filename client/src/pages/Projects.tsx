@@ -71,15 +71,27 @@ const Projects = () => {
     element.click();
   }
   const togglePublish = async () => {
-      try {
-      const {data} = await api.get(`/api/user/publish-toggle/${projectId}`)
+    try {
+      const { data } = await api.get(`/api/user/publish-toggle/${projectId}`)
       toast.success(data.message)
-      setProject((prev)=>prev ? ({...prev,isPublished:!prev.isPublished}) : null)
-    } catch (error : any) {
-        toast.error(error?.response?.data?.message || error.message)
-        console.log(error);
+      setProject((prev) => prev ? ({ ...prev, isPublished: !prev.isPublished }) : null)
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || error.message)
+      console.log(error);
     }
   }
+
+  const handleCancel = async () => {
+    try {
+      await api.post(`/api/user/project/cancel/${projectId}`);
+      toast.info('Generation cancelled');
+      setIsGenerating(false);
+      // Wait a moment then fetch project to show the cancelled state
+      setTimeout(fetchProject, 1000);
+    } catch (error: any) {
+      toast.error('Failed to cancel generation');
+    }
+  };
 
   useEffect(()=>{
     if(session?.user && projectId){
@@ -115,14 +127,14 @@ const Projects = () => {
     }
   },[project, projectId])
   
-  if(loading){
-    return(
-      <>  
-      <div className='flex items-center justify-center h-screen'>
-        <Loader2Icon className='size-7 animate-spin text-emerald-300' />
-
+  if (loading) {
+    return (
+      <div className='flex flex-col items-center justify-center h-screen bg-gray-900 gap-6'>
+        <div className='flex flex-col items-center gap-3'>
+          <Loader2Icon className='size-10 animate-spin text-emerald-400' />
+          <p className='text-emerald-300 font-medium animate-pulse'>Initializing Project...</p>
+        </div>
       </div>
-      </>
     )
   }
   return project ?(
@@ -176,7 +188,7 @@ const Projects = () => {
         <div className='flex-1 flex overflow-auto'>
            <Sidebar isMenuOpen={isMenuOpen} project={project} setProject={(p)=> setProject(p)} isGenerating={isGenerating} setIsGenerating={setIsGenerating}/>
            <div className='flex-1 p-2 pl-0'> 
-            <ProjectPreview ref={previewRef} project={project} isGenerating={isGenerating} device={device} />
+            <ProjectPreview ref={previewRef} project={project} isGenerating={isGenerating} device={device} onCancel={handleCancel} />
            </div>
 
         </div>

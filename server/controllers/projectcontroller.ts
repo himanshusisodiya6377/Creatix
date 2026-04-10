@@ -1,58 +1,47 @@
-import {Request,Response} from 'express';
+import { Request, Response } from 'express';
 import prisma from "../lib/prisma.js";
-import ai from "../configs/ai.js";
+import aiService from "../lib/aiService.js";
+import { taskManager } from "../lib/taskManager.js";
 
 const validateWebsiteCode = (code: string): boolean => {
-  // Check for required HTML structure
-  if (!code.includes('<html') && !code.includes('<!DOCTYPE')) {
-    console.warn('Validation: Missing HTML structure');
-    return false;
-  }
-  
-  // Check for body tag
-  if (!code.includes('<body')) {
-    console.warn('Validation: Missing body tag');
-    return false;
-  }
-  
-  // Check for multi-page router pattern (pages object + addEventListener)
-  if (!code.includes('pages') || !code.includes('hashchange')) {
-    console.warn('Validation: Missing multi-page router pattern');
-    return false;
-  }
-  
-  // Check for at least one page link (hash navigation)
-  if (!/href\s*=\s*["']#\//g.test(code)) {
-    console.warn('Validation: Missing page navigation links');
-    return false;
+  const checks = [
+    { 
+      name: 'HTML/Doctype', 
+      test: () => code.includes('<html') || code.includes('<!DOCTYPE'),
+      error: 'Missing basic HTML structure or <!DOCTYPE>'
+    },
+    { 
+      name: 'Body Tag', 
+      test: () => code.includes('<body'),
+      error: 'Missing <body> tag' 
+    },
+    { 
+      name: 'Code Length', 
+      test: () => code.length >= 500,
+      error: 'Code too short (< 500 chars) - likely incomplete' 
+    }
+  ];
+
+  for (const check of checks) {
+    if (!check.test()) {
+      console.warn(`❌ Validation Failed [${check.name}]: ${check.error}`);
+      return false;
+    }
   }
 
-  // Check for Tailwind CSS
-  if (!code.includes('tailwindcss') && !code.includes('tailwind')) {
-    console.warn('Validation: Missing Tailwind CSS');
-    return false;
-  }
-
-  // Check minimum code length (valid website should be >1KB)
-  if (code.length < 1000) {
-    console.warn('Validation: Code too short - likely incomplete');
-    return false;
-  }
-
-  console.log('Validation passed - Website structure is valid');
+  console.log('✅ Validation passed - Website structure is valid');
   return true;
 };
 
 
 // Controller Function to make Revision
 export const makeRevision = async (req: Request, res: Response) => {
-     const userId = req.userId as string;
+  const userId = req.userId as string;
+  const { projectId } = req.params as { projectId: string };
+  const { message, model } = req.body;
+
   try {
-    
-    const {projectId} = req.params as { projectId: string };
-    const {message} = req.body;
-    
-     const user = await prisma.user.findUnique({ where: { id: userId } });
+    const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!userId || !user) {
       return res.status(401).json({ message: "Unauthorized" });
     }
@@ -79,32 +68,35 @@ export const makeRevision = async (req: Request, res: Response) => {
     })
 
 
+    const controller = new AbortController();
+    taskManager.addTask(projectId, controller);
+    
     //Enhance user prompt
-    const promptEnhanceResponse = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+    const enhancedPrompt = await aiService.generateContent({
+        model,
+        signal: controller.signal,
         contents: [
             {
                 role: 'user',
                 parts: [
-                  {
-                    text: `You are a prompt enhancement specialist. The user wants to make changes to their website. Enhance their request to be more specific and actionable for a web developer.
-
-Enhance this by:
-1. Being specific about what elements to change.
-2. Mentioning design details (colors, spacing, sizes)
-3. Clarifying the desired outcome.
-4. Using clear technical terms
-
-Return ONLY the enhanced request, nothing else. Keep it concise (1-2 sentences).
-
-User's request: "${message}"`
-                  }
+                    {
+                        text: `You are a prompt enhancement specialist for a SINGLE-PAGE vertical website generator.
+                        
+                        If the user asks for a 'new page' or 'additional page' (e.g., 'create a contact page'), you MUST translate this into: 'Add a new [Name] section to the bottom of the existing page with high-quality design and a smooth-scroll navigation link in the header'.
+                        
+                        Enhance the request by:
+                        1. Being specific about the section's layout and content.
+                        2. Mentioning custom CSS design details (minimalist, clean spacing).
+                        3. Ensuring it fits perfectly at the end of the current HTML body.
+                        
+                        Return ONLY the enhanced request, nothing else. Keep it concise.
+                        
+                        User's request: "${message}"`
+                    }
                 ]
             }
         ]
-    })
-
-    const enhancedPrompt = promptEnhanceResponse.candidates?.[0]?.content?.parts?.[0]?.text;
+    });
 
     await prisma.conversation.create({
         data: {
@@ -121,46 +113,52 @@ User's request: "${message}"`
         }
     })
 
+    console.log(`🛠️ Revision starting for project: ${projectId} (Model: ${model})`);
     // Generate website code
-    const codegenerationresponse = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+    const code = await aiService.generateContent({
+        model,
+        signal: controller.signal,
         contents: [
             {
                 role: 'user',
                 parts: [
-                  {
-                    text: `You are an expert web developer.
+                    {
+                        text: `You are an expert web developer.
 
 CRITICAL REQUIREMENTS:
 - Return ONLY the complete updated HTML code with the requested changes.
-- Use Tailwind CSS for ALL styling (NO custom CSS).
-- Use tailwind utility classes for all styling changes.
-- Include the Tailwind script: <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script> in head.
-- Include all JavaScript in <script> tags before closing </body>
-- Make sure it's a complete, standalone HTML document with Tailwind CSS.
-- Return the HTML Code Only, nothing else. No explanations or code fences.
+- DO NOT EXPLAIN ANYTHING. NO CONVERSATION. NO CODE FENCES.
+- DO NOT return partial code or just the changed section.
+- You MUST return the full standalone HTML document including the <head>, <style>, and <script> tags.
+- Use VANILLA HTML, CSS, and JS ONLY (NO Tailwind, NO React).
+- Use a single <style> tag for all responsive styling.
+- Use a single <script> tag for interactivity.
 
-MULTIPAGE INTEGRITY:
-- Keep ALL 5 pages (Home, About, Services, Pricing, Contact) intact and fully functional
-- EVERY page MUST have working navigation links to ALL other pages
-- ALL navigation links MUST use format: <a href="#/page-name">
-- Keep footer with page links on ALL pages
-- Mobile menu MUST work on all pages with all page links
-- Apply changes ONLY to requested elements - do NOT break or remove any page links
-- Each page function MUST return COMPLETE HTML (no partial code)
-- Verify: clicking every nav link must navigate correctly to that page
+VERTICAL SINGLE-PAGE ARCHITECTURE (MANDATORY):
+- This is a continuous vertical page. NEVER return separate pages.
+- If the user asks for new content/pages, APPEND it as a new <section> at the bottom of the <body> but before the footer.
+- Add/Update navigation links in the header to point to the new section (e.g., <a href="#contact">).
+- Use Fragment IDs (e.g., id="contact") for every section.
+- Smooth-scrolling MUST be implemented in CSS or JS.
+
+DESIGN PHILOSOPHY:
+- Keep the code lightweight, minimalist, and simple (optimized for free AI models).
+- Ensure the new section matches the aesthetic of the existing code.
 
 Current website code:
 ${currentProject.current_code}
 
 Requested change: "${enhancedPrompt}"`
-                  }
+                    }
                 ]
             }
         ]
-    })
+    });
 
-    const code = codegenerationresponse.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    if (code) {
+      console.log(`✅ Revision code received for project: ${projectId} (${code.length} chars)`);
+    }
+
     if(!code){
         await prisma.conversation.create({
             data: {
@@ -215,10 +213,12 @@ Requested change: "${enhancedPrompt}"`
     })
     
 
-    return res.status(200).json({ message: "Changes made successfully" });
+    taskManager.removeTask(projectId);
+    return res.status(200).json({ message: "Revision made successfully" });
   } catch (error: any) {
+    taskManager.removeTask(projectId);
     console.log(error.code || error.message);
-    return res.status(500).json({ message: error.message });
+    return res.status(500).json({ message: error.message === 'Aborted' ? 'Generation was cancelled.' : error.message });
   }
 }
 

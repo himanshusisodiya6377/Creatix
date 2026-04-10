@@ -4,9 +4,9 @@ import Pricing from './pages/Pricing'
 import Projects from './pages/Projects'
 import MyProjects from './pages/MyProjects'
 import Preview from './pages/Preview'
-import {  View } from 'lucide-react'
+import { View } from 'lucide-react'
 import Navbar from './components/Navbar'
-import {Toaster} from "sonner"
+import { Toaster } from "sonner"
 import AuthPage from "./pages/auth/AuthPage"
 import Setting from './pages/Setting'
 import Generate from './pages/Generate'
@@ -18,14 +18,14 @@ import { useEffect } from 'react'
 
 const App = () => {
 
-  const {pathname} = useLocation()
+  const { pathname } = useLocation()
 
-useEffect(()=>{
-  window.scrollTo(0,0)
-}, [pathname])
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [pathname])
 
   const hideNavbar = pathname.startsWith('/projects/') && pathname !== '/projects' || pathname.startsWith('/view/')
-            || pathname.startsWith('/preview')
+    || pathname.startsWith('/preview')
 
   return (
     <div className="relative min-h-screen">
@@ -37,24 +37,24 @@ useEffect(()=>{
         <div className="absolute top-2/3 left-1/2 w-[400px] h-[400px] rounded-full bg-emerald-600/10 blur-[100px]" />
       </div>
 
-      <Toaster/>
-      {!hideNavbar && <Navbar/>}
-      
-      <Routes>  
+      <Toaster />
+      {!hideNavbar && <Navbar />}
+
+      <Routes>
         <Route path='/' element={<Home />} />
         <Route path='/about' element={<About />} />
-        <Route path='/pricing' element={<Pricing/>} />
-        <Route path='/project/:projectId' element={<Projects/>} />
-        <Route path='/projects' element={<MyProjects/>} />
-        <Route path='/preview/:projectId' element={<Preview/>} />
-        <Route path='/preview/:projectId/:VersionId' element={<Preview/>} />
-        <Route path='/preview' element={<YtPreview/>} />
-         <Route path='/view/:projectId' element={<View/>} />
-         <Route path="/auth/:pathname" element={<AuthPage />} />
-         <Route path="/account/settings" element={<Setting />} />
-         <Route path="/my-thumbnail" element={<MyGenerations />} />
-         <Route path="/thumbnail" element={<Generate />} />
-         <Route path="/thumbnail/:id" element={<Generate />} />
+        <Route path='/pricing' element={<Pricing />} />
+        <Route path='/project/:projectId' element={<Projects />} />
+        <Route path='/projects' element={<MyProjects />} />
+        <Route path='/preview/:projectId' element={<Preview />} />
+        <Route path='/preview/:projectId/:versionId' element={<Preview />} />
+        <Route path='/preview' element={<YtPreview />} />
+        <Route path='/view/:projectId' element={<View />} />
+        <Route path="/auth/:pathname" element={<AuthPage />} />
+        <Route path="/account/settings" element={<Setting />} />
+        <Route path="/my-thumbnail" element={<MyGenerations />} />
+        <Route path="/thumbnail" element={<Generate />} />
+        <Route path="/thumbnail/:id" element={<Generate />} />
       </Routes>
     </div>
   )
