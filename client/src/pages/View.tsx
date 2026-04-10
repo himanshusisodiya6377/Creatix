@@ -1,9 +1,10 @@
 import { useEffect,useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { dummyProjects } from '../assets/assets';
 import { Loader2Icon } from 'lucide-react';
 import ProjectPreview from '../components/ProjectPreview';
 import type { Project } from '../types';
+import api from '../configs/axios';
+import { toast } from 'react-hot-toast';
 
 const View = () => {
   const {projectId} = useParams();
@@ -11,18 +12,30 @@ const View = () => {
   const [loading , setLoading] = useState(true);
 
   const fetchCode = async ()=>{
-    const code = dummyProjects.find(project => project.id === projectId)?.current_code;
-    setTimeout(()=>{
-      if(code){
-        setCode(code);
-        setLoading(false)
+    try {
+      if(!projectId) {
+        toast.error('Project ID not found');
+        return;
       }
-    },2000)
+      
+      const {data} = await api.get(`/api/project/published/${projectId}`);
+      
+      if(data?.current_code) {
+        setCode(data.current_code);
+      } else {
+        toast.error('Project code not found');
+      }
+    } catch (error: any) {
+      console.error('Error fetching project:', error);
+      toast.error(error?.response?.data?.message || 'Failed to load project');
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(()=>{
     fetchCode()
-  },[])
+  },[projectId])
 
   if(loading){
     return (

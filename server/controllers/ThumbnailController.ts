@@ -3,7 +3,7 @@ import prisma from '../lib/prisma.js';
 import { generateImageWithClipdrop } from '../configs/clipdrop.js';
 import path from 'node:path';
 import fs from 'fs';
-import {v2 as cloudinary} from 'cloudinary';
+import cloudinary from '../configs/cloudinary.js';
 
 
 // DYNAMIC THUMBNAIL PROMPT SYSTEM
@@ -286,11 +286,13 @@ const generateThumbnailAsync = async (thumbnailId: string, userId: string, title
 
     const uploadResult = await cloudinary.uploader.upload(filePath, {resource_type:'image'})
 
-    // Update the thumbnail with the image URL
+    // Update the thumbnail with the image URL (use secure_url for HTTPS)
+    const thumbnailUrl = uploadResult.secure_url || uploadResult.url;
+    
     await prisma.thumbnail.update({
       where: { id: thumbnailId },
       data: {
-        image_url: uploadResult.url,
+        image_url: thumbnailUrl,
         isGenerating: false
       }
     });
@@ -360,6 +362,42 @@ export const deleteThumbnail = async (req: Request, res: Response)=>{
     });
 
     res.json({ message: 'Thumbnail deleted successfully' });
+  } catch (error: any) {
+    console.log(error);
+    res.status(500).json({ message: error.message });
+  }
+}
+
+export const downloadThumbnail = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params as { id: string };
+    const userId = req.userId as string;
+
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized - no userId" });
+    }
+
+    // Get thumbnail from database
+    const thumbnail = await prisma.thumbnail.findUnique({
+      where: { id: id }
+    });
+
+    if (!thumbnail) {
+      return res.status(404).json({ message: 'Thumbnail not found' });
+    }
+
+    if (thumbnail.userId !== userId) {
+      return res.status(403).json({ message: 'Unauthorized - thumbnail does not belong to user' });
+    }
+
+    if (!thumbnail.image_url) {
+      return res.status(400).json({ message: 'Thumbnail image URL not found' });
+    }
+
+    // Redirect to Cloudinary with attachment flag for download
+    const downloadUrl = thumbnail.image_url.replace('/upload', '/upload/fl_attachment');
+    
+    res.redirect(downloadUrl);
   } catch (error: any) {
     console.log(error);
     res.status(500).json({ message: error.message });
