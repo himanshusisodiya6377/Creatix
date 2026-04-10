@@ -24,12 +24,12 @@ const validateWebsiteCode = (code: string): boolean => {
 
   for (const check of checks) {
     if (!check.test()) {
-      console.warn(`❌ Validation Failed [${check.name}]: ${check.error}`);
+      console.warn(`Validation Failed [${check.name}]: ${check.error}`);
       return false;
     }
   }
 
-  console.log('✅ Validation passed - Website structure is valid');
+  console.log('Validation passed - Website structure is valid');
   return true;
 };
 

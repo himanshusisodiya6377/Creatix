@@ -24,12 +24,12 @@ const validateWebsiteCode = (code: string): boolean => {
 
   for (const check of checks) {
     if (!check.test()) {
-      console.warn(`❌ Validation Failed [${check.name}]: ${check.error}`);
+      console.warn(` Validation Failed [${check.name}]: ${check.error}`);
       return false;
     }
   }
 
-  console.log('✅ Validation passed - Website structure is valid');
+  console.log(' Validation passed - Website structure is valid');
   return true;
 };
 
@@ -113,7 +113,7 @@ export const makeRevision = async (req: Request, res: Response) => {
         }
     })
 
-    console.log(`🛠️ Revision starting for project: ${projectId} (Model: ${model})`);
+    console.log(` Revision starting for project: ${projectId} (Model: ${model})`);
     // Generate website code
     const code = await aiService.generateContent({
         model,
@@ -156,7 +156,7 @@ Requested change: "${enhancedPrompt}"`
     });
 
     if (code) {
-      console.log(`✅ Revision code received for project: ${projectId} (${code.length} chars)`);
+      console.log(`Revision code received for project: ${projectId} (${code.length} chars)`);
     }
 
     if(!code){

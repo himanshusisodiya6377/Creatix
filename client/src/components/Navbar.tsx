@@ -3,7 +3,7 @@ import { assets } from '../assets/assets';
 import { Link, useNavigate } from 'react-router-dom';
 import {authClient} from "../lib/auth-client"
 import { UserButton } from '@daveyplate/better-auth-ui';
-import { Sparkles } from 'lucide-react';
+// Sparkles removed
 
 const Navbar = () => {
      const [menuOpen, setMenuOpen] = useState(false);
@@ -14,7 +14,7 @@ const Navbar = () => {
     <>
       <nav className="z-50 flex items-center justify-between w-full py-4 px-4 md:px-16 lg:px-24 xl:px-32 glass border-b border-white/8 text-white sticky top-0">
         <Link to='/' className="flex items-center gap-2">
-              <Sparkles className="h-5 sm:h-7 text-emerald-400" />
+              <img src="/favicon.svg" alt="logo" className="h-5 sm:h-7" />
               <span className="hidden sm:inline font-semibold text-lg">Creatix</span>
           </Link>
 

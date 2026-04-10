@@ -5,9 +5,9 @@ import path from 'node:path';
 import fs from 'fs';
 import {v2 as cloudinary} from 'cloudinary';
 
-// ============================================
+
 // DYNAMIC THUMBNAIL PROMPT SYSTEM
-// ============================================
+
 
 interface ThumbnailAnalysis {
   mainSubject: string;
