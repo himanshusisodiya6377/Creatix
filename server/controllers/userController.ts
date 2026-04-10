@@ -100,6 +100,11 @@ export const createUserProject = async (req: Request, res: Response) => {
                   - The navbar and footer MUST be included in the single HTML document.
                   - Use smooth-scrolling for a premium feel.
                   
+                  IMAGES:
+                  - If you need images, use ONLY https://picsum.photos/{width}/{height} (e.g., https://picsum.photos/800/400).
+                  - Do NOT use via.placeholder.com, placehold.co, or any other placeholder service.
+                  - Prefer CSS gradients, SVG icons, and background colors over images where possible.
+                  
                   DESIGN PHILOSOPHY:
                   - Keep the code lightweight and simple (optimized for free AI models).
                   - Focus on high-quality typography and clean minimalist aesthetics.`,
