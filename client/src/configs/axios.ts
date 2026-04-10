@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const api = axios.create({
-    baseURL: import.meta.env.VITE_BASE_URL || 'https://creatix-backend.onrender.com',
+    baseURL: import.meta.env.VITE_BASE_URL || 'http://localhost:3000',
     withCredentials: true,
     timeout: 30000, // 30 second timeout
     headers: {
