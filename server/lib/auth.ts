@@ -3,10 +3,7 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import prisma from "./prisma.js"
 
-const trustedOrigins = (process.env.TRUSTED_ORIGINS || 'http://localhost:5173,http://localhost:3000')
-  .split(',')
-  .map(origin => origin.trim())
-  .filter(origin => origin.length > 0);
+const trustedOrigins = [process.env.TRUSTED_ORIGINS || ''];
 
 //creat authentication system
 export const auth = betterAuth({
