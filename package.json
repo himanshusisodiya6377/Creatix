@@ -1,0 +1,10 @@
+{
+  "name": "creatix",
+  "private": true,
+  "scripts": {
+    "install-all": "cd client && npm ci && cd ../server && npm ci",
+    "build": "cd client && npm run build && cd ../server && npm run build",
+    "start": "cd server && npm start",
+    "dev": "npm run install-all && npm run build && npm start"
+  }
+}
