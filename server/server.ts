@@ -2,11 +2,16 @@ import "dotenv/config";
 import express, { Request, Response } from 'express';
 import cors from "cors";
 import os from "os";
+import path from "path";
+import { fileURLToPath } from 'url';
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "./lib/auth.js";
 import userRouter from "./routes/userRoutes.js";
 import projectRouter from "./routes/projectRoutes.js";
 import ThumbnailRouter from "./routes/thumbnailRoutes.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
@@ -28,17 +33,24 @@ app.use((req, res, next) => {
 app.use(cors(corsOptions))
 app.use(express.json({limit:'50mb'}));
 
+// Serve static files from client/dist
+const clientDistPath = path.join(__dirname, '../client/dist');
+app.use(express.static(clientDistPath));
+
 app.use("/api/auth", toNodeHandler(auth));
 app.use("/api/thumbnail",ThumbnailRouter);
 
 const port = process.env.PORT || 3000;
 
-app.get('/', (req: Request, res: Response) => {
-    res.send('Server is Live!');
-});
-
 app.use('/api/user',userRouter)
 app.use('/api/project',projectRouter)
+
+// SPA fallback - serve index.html for all non-API and non-static routes
+app.use((req: Request, res: Response) => {
+  // If the request doesn't match any API routes or static files,
+  // serve index.html so React Router can handle the route
+  res.sendFile(path.join(clientDistPath, 'index.html'));
+});
 
 // Error Handler - Added at the end
 app.use((err: any, req: Request, res: Response, next: any) => {
