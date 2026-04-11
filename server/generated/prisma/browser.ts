@@ -38,11 +38,6 @@ export type Conversation = Prisma.ConversationModel
  */
 export type Version = Prisma.VersionModel
 /**
- * Model Transaction
- * 
- */
-export type Transaction = Prisma.TransactionModel
-/**
  * Model Session
  * 
  */

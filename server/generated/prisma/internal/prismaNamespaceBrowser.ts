@@ -55,7 +55,6 @@ export const ModelName = {
   WebsiteProject: 'WebsiteProject',
   Conversation: 'Conversation',
   Version: 'Version',
-  Transaction: 'Transaction',
   Session: 'Session',
   Account: 'Account',
   Verification: 'Verification',
@@ -83,7 +82,6 @@ export const UserScalarFieldEnum = {
   email: 'email',
   name: 'name',
   totalCreation: 'totalCreation',
-  credits: 'credits',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   emailVerified: 'emailVerified'
@@ -127,20 +125,6 @@ export const VersionScalarFieldEnum = {
 } as const
 
 export type VersionScalarFieldEnum = (typeof VersionScalarFieldEnum)[keyof typeof VersionScalarFieldEnum]
-
-
-export const TransactionScalarFieldEnum = {
-  id: 'id',
-  isPaid: 'isPaid',
-  planId: 'planId',
-  amount: 'amount',
-  credits: 'credits',
-  userId: 'userId',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-} as const
-
-export type TransactionScalarFieldEnum = (typeof TransactionScalarFieldEnum)[keyof typeof TransactionScalarFieldEnum]
 
 
 export const SessionScalarFieldEnum = {

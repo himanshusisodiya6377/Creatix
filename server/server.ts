@@ -11,7 +11,7 @@ import ThumbnailRouter from "./routes/thumbnailRoutes.js";
 const app = express();
 
 const corsOptions = {
-  origin: process.env.TRUSTED_ORIGINS?.split(',').map(o => o.trim()),
+  origin: process.env.TRUSTED_ORIGINS,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],

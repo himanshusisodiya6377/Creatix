@@ -28,12 +28,10 @@ export type AggregateUser = {
 
 export type UserAvgAggregateOutputType = {
   totalCreation: number | null
-  credits: number | null
 }
 
 export type UserSumAggregateOutputType = {
   totalCreation: number | null
-  credits: number | null
 }
 
 export type UserMinAggregateOutputType = {
@@ -41,7 +39,6 @@ export type UserMinAggregateOutputType = {
   email: string | null
   name: string | null
   totalCreation: number | null
-  credits: number | null
   createdAt: Date | null
   updatedAt: Date | null
   emailVerified: boolean | null
@@ -52,7 +49,6 @@ export type UserMaxAggregateOutputType = {
   email: string | null
   name: string | null
   totalCreation: number | null
-  credits: number | null
   createdAt: Date | null
   updatedAt: Date | null
   emailVerified: boolean | null
@@ -63,7 +59,6 @@ export type UserCountAggregateOutputType = {
   email: number
   name: number
   totalCreation: number
-  credits: number
   createdAt: number
   updatedAt: number
   emailVerified: number
@@ -73,12 +68,10 @@ export type UserCountAggregateOutputType = {
 
 export type UserAvgAggregateInputType = {
   totalCreation?: true
-  credits?: true
 }
 
 export type UserSumAggregateInputType = {
   totalCreation?: true
-  credits?: true
 }
 
 export type UserMinAggregateInputType = {
@@ -86,7 +79,6 @@ export type UserMinAggregateInputType = {
   email?: true
   name?: true
   totalCreation?: true
-  credits?: true
   createdAt?: true
   updatedAt?: true
   emailVerified?: true
@@ -97,7 +89,6 @@ export type UserMaxAggregateInputType = {
   email?: true
   name?: true
   totalCreation?: true
-  credits?: true
   createdAt?: true
   updatedAt?: true
   emailVerified?: true
@@ -108,7 +99,6 @@ export type UserCountAggregateInputType = {
   email?: true
   name?: true
   totalCreation?: true
-  credits?: true
   createdAt?: true
   updatedAt?: true
   emailVerified?: true
@@ -206,7 +196,6 @@ export type UserGroupByOutputType = {
   email: string
   name: string
   totalCreation: number
-  credits: number
   createdAt: Date
   updatedAt: Date
   emailVerified: boolean
@@ -240,14 +229,12 @@ export type UserWhereInput = {
   email?: Prisma.StringFilter<"User"> | string
   name?: Prisma.StringFilter<"User"> | string
   totalCreation?: Prisma.IntFilter<"User"> | number
-  credits?: Prisma.IntFilter<"User"> | number
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   emailVerified?: Prisma.BoolFilter<"User"> | boolean
   projects?: Prisma.WebsiteProjectListRelationFilter
   sessions?: Prisma.SessionListRelationFilter
   accounts?: Prisma.AccountListRelationFilter
-  transactions?: Prisma.TransactionListRelationFilter
   thumbnails?: Prisma.ThumbnailListRelationFilter
 }
 
@@ -256,14 +243,12 @@ export type UserOrderByWithRelationInput = {
   email?: Prisma.SortOrder
   name?: Prisma.SortOrder
   totalCreation?: Prisma.SortOrder
-  credits?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   emailVerified?: Prisma.SortOrder
   projects?: Prisma.WebsiteProjectOrderByRelationAggregateInput
   sessions?: Prisma.SessionOrderByRelationAggregateInput
   accounts?: Prisma.AccountOrderByRelationAggregateInput
-  transactions?: Prisma.TransactionOrderByRelationAggregateInput
   thumbnails?: Prisma.ThumbnailOrderByRelationAggregateInput
 }
 
@@ -275,14 +260,12 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   email?: Prisma.StringFilter<"User"> | string
   name?: Prisma.StringFilter<"User"> | string
   totalCreation?: Prisma.IntFilter<"User"> | number
-  credits?: Prisma.IntFilter<"User"> | number
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   emailVerified?: Prisma.BoolFilter<"User"> | boolean
   projects?: Prisma.WebsiteProjectListRelationFilter
   sessions?: Prisma.SessionListRelationFilter
   accounts?: Prisma.AccountListRelationFilter
-  transactions?: Prisma.TransactionListRelationFilter
   thumbnails?: Prisma.ThumbnailListRelationFilter
 }, "id">
 
@@ -291,7 +274,6 @@ export type UserOrderByWithAggregationInput = {
   email?: Prisma.SortOrder
   name?: Prisma.SortOrder
   totalCreation?: Prisma.SortOrder
-  credits?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   emailVerified?: Prisma.SortOrder
@@ -310,7 +292,6 @@ export type UserScalarWhereWithAggregatesInput = {
   email?: Prisma.StringWithAggregatesFilter<"User"> | string
   name?: Prisma.StringWithAggregatesFilter<"User"> | string
   totalCreation?: Prisma.IntWithAggregatesFilter<"User"> | number
-  credits?: Prisma.IntWithAggregatesFilter<"User"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   emailVerified?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
@@ -321,14 +302,12 @@ export type UserCreateInput = {
   email: string
   name: string
   totalCreation?: number
-  credits?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   emailVerified?: boolean
   projects?: Prisma.WebsiteProjectCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
-  transactions?: Prisma.TransactionCreateNestedManyWithoutUserInput
   thumbnails?: Prisma.ThumbnailCreateNestedManyWithoutUserInput
 }
 
@@ -337,14 +316,12 @@ export type UserUncheckedCreateInput = {
   email: string
   name: string
   totalCreation?: number
-  credits?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   emailVerified?: boolean
   projects?: Prisma.WebsiteProjectUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
-  transactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutUserInput
   thumbnails?: Prisma.ThumbnailUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -353,14 +330,12 @@ export type UserUpdateInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   totalCreation?: Prisma.IntFieldUpdateOperationsInput | number
-  credits?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   projects?: Prisma.WebsiteProjectUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
-  transactions?: Prisma.TransactionUpdateManyWithoutUserNestedInput
   thumbnails?: Prisma.ThumbnailUpdateManyWithoutUserNestedInput
 }
 
@@ -369,14 +344,12 @@ export type UserUncheckedUpdateInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   totalCreation?: Prisma.IntFieldUpdateOperationsInput | number
-  credits?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   projects?: Prisma.WebsiteProjectUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
-  transactions?: Prisma.TransactionUncheckedUpdateManyWithoutUserNestedInput
   thumbnails?: Prisma.ThumbnailUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -385,7 +358,6 @@ export type UserCreateManyInput = {
   email: string
   name: string
   totalCreation?: number
-  credits?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   emailVerified?: boolean
@@ -396,7 +368,6 @@ export type UserUpdateManyMutationInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   totalCreation?: Prisma.IntFieldUpdateOperationsInput | number
-  credits?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -407,7 +378,6 @@ export type UserUncheckedUpdateManyInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   totalCreation?: Prisma.IntFieldUpdateOperationsInput | number
-  credits?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -418,7 +388,6 @@ export type UserCountOrderByAggregateInput = {
   email?: Prisma.SortOrder
   name?: Prisma.SortOrder
   totalCreation?: Prisma.SortOrder
-  credits?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   emailVerified?: Prisma.SortOrder
@@ -426,7 +395,6 @@ export type UserCountOrderByAggregateInput = {
 
 export type UserAvgOrderByAggregateInput = {
   totalCreation?: Prisma.SortOrder
-  credits?: Prisma.SortOrder
 }
 
 export type UserMaxOrderByAggregateInput = {
@@ -434,7 +402,6 @@ export type UserMaxOrderByAggregateInput = {
   email?: Prisma.SortOrder
   name?: Prisma.SortOrder
   totalCreation?: Prisma.SortOrder
-  credits?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   emailVerified?: Prisma.SortOrder
@@ -445,7 +412,6 @@ export type UserMinOrderByAggregateInput = {
   email?: Prisma.SortOrder
   name?: Prisma.SortOrder
   totalCreation?: Prisma.SortOrder
-  credits?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   emailVerified?: Prisma.SortOrder
@@ -453,7 +419,6 @@ export type UserMinOrderByAggregateInput = {
 
 export type UserSumOrderByAggregateInput = {
   totalCreation?: Prisma.SortOrder
-  credits?: Prisma.SortOrder
 }
 
 export type UserScalarRelationFilter = {
@@ -493,20 +458,6 @@ export type UserUpdateOneRequiredWithoutProjectsNestedInput = {
   upsert?: Prisma.UserUpsertWithoutProjectsInput
   connect?: Prisma.UserWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutProjectsInput, Prisma.UserUpdateWithoutProjectsInput>, Prisma.UserUncheckedUpdateWithoutProjectsInput>
-}
-
-export type UserCreateNestedOneWithoutTransactionsInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutTransactionsInput, Prisma.UserUncheckedCreateWithoutTransactionsInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutTransactionsInput
-  connect?: Prisma.UserWhereUniqueInput
-}
-
-export type UserUpdateOneRequiredWithoutTransactionsNestedInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutTransactionsInput, Prisma.UserUncheckedCreateWithoutTransactionsInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutTransactionsInput
-  upsert?: Prisma.UserUpsertWithoutTransactionsInput
-  connect?: Prisma.UserWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutTransactionsInput, Prisma.UserUpdateWithoutTransactionsInput>, Prisma.UserUncheckedUpdateWithoutTransactionsInput>
 }
 
 export type UserCreateNestedOneWithoutSessionsInput = {
@@ -556,13 +507,11 @@ export type UserCreateWithoutProjectsInput = {
   email: string
   name: string
   totalCreation?: number
-  credits?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   emailVerified?: boolean
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
-  transactions?: Prisma.TransactionCreateNestedManyWithoutUserInput
   thumbnails?: Prisma.ThumbnailCreateNestedManyWithoutUserInput
 }
 
@@ -571,13 +520,11 @@ export type UserUncheckedCreateWithoutProjectsInput = {
   email: string
   name: string
   totalCreation?: number
-  credits?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   emailVerified?: boolean
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
-  transactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutUserInput
   thumbnails?: Prisma.ThumbnailUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -602,13 +549,11 @@ export type UserUpdateWithoutProjectsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   totalCreation?: Prisma.IntFieldUpdateOperationsInput | number
-  credits?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
-  transactions?: Prisma.TransactionUpdateManyWithoutUserNestedInput
   thumbnails?: Prisma.ThumbnailUpdateManyWithoutUserNestedInput
 }
 
@@ -617,87 +562,9 @@ export type UserUncheckedUpdateWithoutProjectsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   totalCreation?: Prisma.IntFieldUpdateOperationsInput | number
-  credits?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
-  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
-  transactions?: Prisma.TransactionUncheckedUpdateManyWithoutUserNestedInput
-  thumbnails?: Prisma.ThumbnailUncheckedUpdateManyWithoutUserNestedInput
-}
-
-export type UserCreateWithoutTransactionsInput = {
-  id: string
-  email: string
-  name: string
-  totalCreation?: number
-  credits?: number
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  emailVerified?: boolean
-  projects?: Prisma.WebsiteProjectCreateNestedManyWithoutUserInput
-  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
-  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
-  thumbnails?: Prisma.ThumbnailCreateNestedManyWithoutUserInput
-}
-
-export type UserUncheckedCreateWithoutTransactionsInput = {
-  id: string
-  email: string
-  name: string
-  totalCreation?: number
-  credits?: number
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  emailVerified?: boolean
-  projects?: Prisma.WebsiteProjectUncheckedCreateNestedManyWithoutUserInput
-  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
-  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
-  thumbnails?: Prisma.ThumbnailUncheckedCreateNestedManyWithoutUserInput
-}
-
-export type UserCreateOrConnectWithoutTransactionsInput = {
-  where: Prisma.UserWhereUniqueInput
-  create: Prisma.XOR<Prisma.UserCreateWithoutTransactionsInput, Prisma.UserUncheckedCreateWithoutTransactionsInput>
-}
-
-export type UserUpsertWithoutTransactionsInput = {
-  update: Prisma.XOR<Prisma.UserUpdateWithoutTransactionsInput, Prisma.UserUncheckedUpdateWithoutTransactionsInput>
-  create: Prisma.XOR<Prisma.UserCreateWithoutTransactionsInput, Prisma.UserUncheckedCreateWithoutTransactionsInput>
-  where?: Prisma.UserWhereInput
-}
-
-export type UserUpdateToOneWithWhereWithoutTransactionsInput = {
-  where?: Prisma.UserWhereInput
-  data: Prisma.XOR<Prisma.UserUpdateWithoutTransactionsInput, Prisma.UserUncheckedUpdateWithoutTransactionsInput>
-}
-
-export type UserUpdateWithoutTransactionsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  totalCreation?: Prisma.IntFieldUpdateOperationsInput | number
-  credits?: Prisma.IntFieldUpdateOperationsInput | number
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  projects?: Prisma.WebsiteProjectUpdateManyWithoutUserNestedInput
-  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
-  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
-  thumbnails?: Prisma.ThumbnailUpdateManyWithoutUserNestedInput
-}
-
-export type UserUncheckedUpdateWithoutTransactionsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  totalCreation?: Prisma.IntFieldUpdateOperationsInput | number
-  credits?: Prisma.IntFieldUpdateOperationsInput | number
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  projects?: Prisma.WebsiteProjectUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   thumbnails?: Prisma.ThumbnailUncheckedUpdateManyWithoutUserNestedInput
@@ -708,13 +575,11 @@ export type UserCreateWithoutSessionsInput = {
   email: string
   name: string
   totalCreation?: number
-  credits?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   emailVerified?: boolean
   projects?: Prisma.WebsiteProjectCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
-  transactions?: Prisma.TransactionCreateNestedManyWithoutUserInput
   thumbnails?: Prisma.ThumbnailCreateNestedManyWithoutUserInput
 }
 
@@ -723,13 +588,11 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   email: string
   name: string
   totalCreation?: number
-  credits?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   emailVerified?: boolean
   projects?: Prisma.WebsiteProjectUncheckedCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
-  transactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutUserInput
   thumbnails?: Prisma.ThumbnailUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -754,13 +617,11 @@ export type UserUpdateWithoutSessionsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   totalCreation?: Prisma.IntFieldUpdateOperationsInput | number
-  credits?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   projects?: Prisma.WebsiteProjectUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
-  transactions?: Prisma.TransactionUpdateManyWithoutUserNestedInput
   thumbnails?: Prisma.ThumbnailUpdateManyWithoutUserNestedInput
 }
 
@@ -769,13 +630,11 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   totalCreation?: Prisma.IntFieldUpdateOperationsInput | number
-  credits?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   projects?: Prisma.WebsiteProjectUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
-  transactions?: Prisma.TransactionUncheckedUpdateManyWithoutUserNestedInput
   thumbnails?: Prisma.ThumbnailUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -784,13 +643,11 @@ export type UserCreateWithoutAccountsInput = {
   email: string
   name: string
   totalCreation?: number
-  credits?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   emailVerified?: boolean
   projects?: Prisma.WebsiteProjectCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
-  transactions?: Prisma.TransactionCreateNestedManyWithoutUserInput
   thumbnails?: Prisma.ThumbnailCreateNestedManyWithoutUserInput
 }
 
@@ -799,13 +656,11 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   email: string
   name: string
   totalCreation?: number
-  credits?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   emailVerified?: boolean
   projects?: Prisma.WebsiteProjectUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
-  transactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutUserInput
   thumbnails?: Prisma.ThumbnailUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -830,13 +685,11 @@ export type UserUpdateWithoutAccountsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   totalCreation?: Prisma.IntFieldUpdateOperationsInput | number
-  credits?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   projects?: Prisma.WebsiteProjectUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
-  transactions?: Prisma.TransactionUpdateManyWithoutUserNestedInput
   thumbnails?: Prisma.ThumbnailUpdateManyWithoutUserNestedInput
 }
 
@@ -845,13 +698,11 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   totalCreation?: Prisma.IntFieldUpdateOperationsInput | number
-  credits?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   projects?: Prisma.WebsiteProjectUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
-  transactions?: Prisma.TransactionUncheckedUpdateManyWithoutUserNestedInput
   thumbnails?: Prisma.ThumbnailUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -860,14 +711,12 @@ export type UserCreateWithoutThumbnailsInput = {
   email: string
   name: string
   totalCreation?: number
-  credits?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   emailVerified?: boolean
   projects?: Prisma.WebsiteProjectCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
-  transactions?: Prisma.TransactionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutThumbnailsInput = {
@@ -875,14 +724,12 @@ export type UserUncheckedCreateWithoutThumbnailsInput = {
   email: string
   name: string
   totalCreation?: number
-  credits?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   emailVerified?: boolean
   projects?: Prisma.WebsiteProjectUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
-  transactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutThumbnailsInput = {
@@ -906,14 +753,12 @@ export type UserUpdateWithoutThumbnailsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   totalCreation?: Prisma.IntFieldUpdateOperationsInput | number
-  credits?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   projects?: Prisma.WebsiteProjectUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
-  transactions?: Prisma.TransactionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutThumbnailsInput = {
@@ -921,14 +766,12 @@ export type UserUncheckedUpdateWithoutThumbnailsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   totalCreation?: Prisma.IntFieldUpdateOperationsInput | number
-  credits?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   projects?: Prisma.WebsiteProjectUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
-  transactions?: Prisma.TransactionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -940,7 +783,6 @@ export type UserCountOutputType = {
   projects: number
   sessions: number
   accounts: number
-  transactions: number
   thumbnails: number
 }
 
@@ -948,7 +790,6 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   projects?: boolean | UserCountOutputTypeCountProjectsArgs
   sessions?: boolean | UserCountOutputTypeCountSessionsArgs
   accounts?: boolean | UserCountOutputTypeCountAccountsArgs
-  transactions?: boolean | UserCountOutputTypeCountTransactionsArgs
   thumbnails?: boolean | UserCountOutputTypeCountThumbnailsArgs
 }
 
@@ -986,13 +827,6 @@ export type UserCountOutputTypeCountAccountsArgs<ExtArgs extends runtime.Types.E
 /**
  * UserCountOutputType without action
  */
-export type UserCountOutputTypeCountTransactionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.TransactionWhereInput
-}
-
-/**
- * UserCountOutputType without action
- */
 export type UserCountOutputTypeCountThumbnailsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.ThumbnailWhereInput
 }
@@ -1003,14 +837,12 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   email?: boolean
   name?: boolean
   totalCreation?: boolean
-  credits?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   emailVerified?: boolean
   projects?: boolean | Prisma.User$projectsArgs<ExtArgs>
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
-  transactions?: boolean | Prisma.User$transactionsArgs<ExtArgs>
   thumbnails?: boolean | Prisma.User$thumbnailsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
@@ -1020,7 +852,6 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   email?: boolean
   name?: boolean
   totalCreation?: boolean
-  credits?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   emailVerified?: boolean
@@ -1031,7 +862,6 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   email?: boolean
   name?: boolean
   totalCreation?: boolean
-  credits?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   emailVerified?: boolean
@@ -1042,18 +872,16 @@ export type UserSelectScalar = {
   email?: boolean
   name?: boolean
   totalCreation?: boolean
-  credits?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   emailVerified?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "name" | "totalCreation" | "credits" | "createdAt" | "updatedAt" | "emailVerified", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "name" | "totalCreation" | "createdAt" | "updatedAt" | "emailVerified", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   projects?: boolean | Prisma.User$projectsArgs<ExtArgs>
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
-  transactions?: boolean | Prisma.User$transactionsArgs<ExtArgs>
   thumbnails?: boolean | Prisma.User$thumbnailsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -1066,7 +894,6 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     projects: Prisma.$WebsiteProjectPayload<ExtArgs>[]
     sessions: Prisma.$SessionPayload<ExtArgs>[]
     accounts: Prisma.$AccountPayload<ExtArgs>[]
-    transactions: Prisma.$TransactionPayload<ExtArgs>[]
     thumbnails: Prisma.$ThumbnailPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -1074,7 +901,6 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     email: string
     name: string
     totalCreation: number
-    credits: number
     createdAt: Date
     updatedAt: Date
     emailVerified: boolean
@@ -1475,7 +1301,6 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   projects<T extends Prisma.User$projectsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$projectsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WebsiteProjectPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   sessions<T extends Prisma.User$sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   accounts<T extends Prisma.User$accountsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$accountsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  transactions<T extends Prisma.User$transactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$transactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   thumbnails<T extends Prisma.User$thumbnailsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$thumbnailsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ThumbnailPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1510,7 +1335,6 @@ export interface UserFieldRefs {
   readonly email: Prisma.FieldRef<"User", 'String'>
   readonly name: Prisma.FieldRef<"User", 'String'>
   readonly totalCreation: Prisma.FieldRef<"User", 'Int'>
-  readonly credits: Prisma.FieldRef<"User", 'Int'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly emailVerified: Prisma.FieldRef<"User", 'Boolean'>
@@ -1971,30 +1795,6 @@ export type User$accountsArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   take?: number
   skip?: number
   distinct?: Prisma.AccountScalarFieldEnum | Prisma.AccountScalarFieldEnum[]
-}
-
-/**
- * User.transactions
- */
-export type User$transactionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Transaction
-   */
-  select?: Prisma.TransactionSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the Transaction
-   */
-  omit?: Prisma.TransactionOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.TransactionInclude<ExtArgs> | null
-  where?: Prisma.TransactionWhereInput
-  orderBy?: Prisma.TransactionOrderByWithRelationInput | Prisma.TransactionOrderByWithRelationInput[]
-  cursor?: Prisma.TransactionWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.TransactionScalarFieldEnum | Prisma.TransactionScalarFieldEnum[]
 }
 
 /**

@@ -18,7 +18,6 @@ model User {
   email         String
   name          String
   totalCreation Int    @default(0)
-  credits       Int    @default(20)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   emailVerified Boolean   @default(false)
@@ -27,7 +26,6 @@ model User {
   projects   WebsiteProject[]
   sessions   Session[]
   accounts   Account[]
-  transactions Transaction[]
   thumbnails Thumbnail[]
 
   @@map("user")
@@ -78,19 +76,6 @@ model Version {
   project WebsiteProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
 
-model Transaction {
-  id        String   @id @default(uuid())
-  isPaid    Boolean  @default(false)
-  planId    String
-  amount    Float
-  credits   Int
-  userId    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
 
 model Session {
   id        String   @id
