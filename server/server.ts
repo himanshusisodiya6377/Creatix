@@ -46,12 +46,6 @@ const port = process.env.PORT || 3000;
 app.use('/api/user',userRouter)
 app.use('/api/project',projectRouter)
 
-// SPA fallback - serve index.html for all non-API and non-static routes
-app.use((req: Request, res: Response) => {
-  // If the request doesn't match any API routes or static files,
-  // serve index.html so React Router can handle the route
-  res.sendFile(path.join(clientDistPath, 'index.html'));
-});
 
 // Error Handler - Added at the end
 app.use((err: any, req: Request, res: Response, next: any) => {
