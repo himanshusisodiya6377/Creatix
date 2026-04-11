@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: creatix-server
+    runtime: node
+    region: oregon
+    buildCommand: |
+      cd client && npm ci && npm run build && cd ../server && npm ci
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+    routes:
+      - path: /api/*
+        destination: /api
+      - path: /*
+        destination: /

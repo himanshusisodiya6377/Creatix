@@ -9,5 +9,24 @@ export default defineConfig({
     alias : {
       "@": path.resolve(__dirname, "./src")
     }
+  },
+  build: {
+    outDir: 'dist',
+    sourcemap: false,
+    minify: 'terser',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor': ['react', 'react-dom', 'react-router-dom']
+        }
+      }
+    },
+    cssCodeSplit: false,
+    reportCompressedSize: false
+  },
+  server: {
+    headers: {
+      'Cache-Control': 'no-cache, no-store, must-revalidate'
+    }
   }
 })
