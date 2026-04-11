@@ -34,7 +34,8 @@ app.use(cors(corsOptions))
 app.use(express.json({limit:'50mb'}));
 
 // Serve static files from client/dist
-const clientDistPath = path.join(__dirname, '../client/dist');
+// Use process.cwd() for reliable path resolution across different environments
+const clientDistPath = path.join(process.cwd(), 'client/dist');
 app.use(express.static(clientDistPath));
 
 app.use("/api/auth", toNodeHandler(auth));
