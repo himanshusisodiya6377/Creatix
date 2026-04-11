@@ -55,6 +55,10 @@ app.use((err: any, req: Request, res: Response, next: any) => {
   });
 });
 
+app.get('/', (req: Request, res: Response) => {
+    res.send('Server is Live!');
+});
+
 app.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`);
 });

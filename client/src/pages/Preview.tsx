@@ -24,16 +24,23 @@ const Preview = () => {
           }
         })
       }
-      setLoading(false);
      } catch (error:any) {
          console.log(error);
-      toast.error('error?.response?.data?.message || error.message')
+      toast.error(error?.response?.data?.message || error?.message || 'Failed to load preview')
+     } finally {
+       setLoading(false)
      }
     }
 
   useEffect(()=>{
-    if(!isPending && session?.user && projectId){
-      fetchCode()
+    if(isPending) return; // still checking auth, wait
+    if(!session?.user) {
+      toast.error('You must be logged in to preview this project');
+      setLoading(false);
+      return;
+    }
+    if(projectId) {
+      fetchCode();
     }
     },[session?.user, projectId, versionId, isPending])
   if(loading){

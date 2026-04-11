@@ -4,7 +4,7 @@ import Pricing from './pages/Pricing'
 import Projects from './pages/Projects'
 import MyProjects from './pages/MyProjects'
 import Preview from './pages/Preview'
-import { View } from 'lucide-react'
+import View from './pages/View'
 import Navbar from './components/Navbar'
 import { Toaster } from "sonner"
 import AuthPage from "./pages/auth/AuthPage"
