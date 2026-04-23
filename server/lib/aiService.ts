@@ -48,11 +48,11 @@ export const generateContent = async (options: AIServiceOptions): Promise<string
 
       const text = response.choices[0].message.content;
       if (text) {
-        console.log(`✅ Generation successful using Groq (${modelToUse})`);
+        console.log(` Generation successful using Groq (${modelToUse})`);
         return text;
       }
     } catch (error: any) {
-      console.warn('⚠️  Groq API failed. Falling back to Gemini...', error.message);
+      console.warn('  Groq API failed. Falling back to Gemini...', error.message);
     }
   }
 
@@ -66,7 +66,7 @@ export const generateContent = async (options: AIServiceOptions): Promise<string
     for (let attempt = 0; attempt < maxRetries; attempt++) {
       if (signal?.aborted) throw new Error('Aborted');
       try {
-        console.log(`🤖 Attempting Gemini model: ${model} (Attempt ${attempt + 1}/${maxRetries})`);
+        console.log(` Attempting Gemini model: ${model} (Attempt ${attempt + 1}/${maxRetries})`);
         const response = await ai.models.generateContent({
           model,
           contents
@@ -74,7 +74,7 @@ export const generateContent = async (options: AIServiceOptions): Promise<string
 
         const text = response.candidates?.[0]?.content?.parts?.[0]?.text;
         if (text) {
-          console.log(`✅ Generation successful using Gemini (${model})`);
+          console.log(` Generation successful using Gemini (${model})`);
           return text;
         }
       } catch (error: any) {
@@ -83,19 +83,19 @@ export const generateContent = async (options: AIServiceOptions): Promise<string
         const message = error?.message || '';
 
         if (status === 503 || status === 429 || message.includes('503') || message.includes('429')) {
-          console.warn(`⚠️  Gemini Model ${model} is busy. Backing off...`);
+          console.warn(`  Gemini Model ${model} is busy. Backing off...`);
           const waitTime = Math.pow(2, attempt) * 1000;
           await sleep(waitTime, signal);
           continue;
         } else {
-          console.error(`❌ Gemini Model ${model} failed:`, message);
+          console.error(` Gemini Model ${model} failed:`, message);
           break; 
         }
       }
     }
   }
 
-  console.error('💥 CRITICAL: This AI service reached the end of the chain without a result.');
+  console.error('CRITICAL: This AI service reached the end of the chain without a result.');
   throw new Error('All AI providers are currently unavailable. Please check your API keys or try again later.');
 };
 

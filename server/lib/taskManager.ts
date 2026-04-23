@@ -25,7 +25,7 @@ class TaskManager {
     if (controller) {
       controller.abort();
       this.tasks.delete(projectId);
-      console.log(`[TaskManager] 🛑 Task ABORTED for project: ${projectId}`);
+      console.log(` Task ABORTED for project: ${projectId}`);
       return true;
     }
     return false;
@@ -34,7 +34,7 @@ class TaskManager {
   removeTask(projectId: string) {
     if (this.tasks.has(projectId)) {
       this.tasks.delete(projectId);
-      console.log(`[TaskManager] Completed task removed for project: ${projectId}`);
+      console.log(` Completed task removed for project: ${projectId}`);
     }
   }
 

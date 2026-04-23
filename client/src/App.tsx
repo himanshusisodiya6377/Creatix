@@ -13,6 +13,7 @@ import Generate from './pages/Generate'
 import MyGenerations from './pages/MyGenerations'
 import YtPreview from './pages/YtPreview'
 import About from './pages/About'
+import Community from './pages/Community'
 import { useEffect } from 'react'
 
 
@@ -43,6 +44,7 @@ const App = () => {
       <Routes>
         <Route path='/' element={<Home />} />
         <Route path='/about' element={<About />} />
+        <Route path='/community' element={<Community />} />
         <Route path='/pricing' element={<Pricing />} />
         <Route path='/project/:projectId' element={<Projects />} />
         <Route path='/projects' element={<MyProjects />} />

@@ -20,6 +20,7 @@ const Navbar = () => {
 
           <div className="hidden md:flex items-center gap-8 transition duration-500">
             <Link to='/' >Home</Link>
+            <Link to='/community' >Community</Link>
             <Link to='/projects' >My Projects</Link>
             <Link to='/about' >About</Link>
           </div>
@@ -48,6 +49,7 @@ const Navbar = () => {
         {menuOpen && (
           <div className="fixed inset-0 z-[100] bg-black/60 text-white backdrop-blur flex flex-col items-center justify-center text-lg gap-8 md:hidden transition-transform duration-300">
             <Link to='/' onClick={() => setMenuOpen(false)}>Home</Link>
+            <Link to='/community' onClick={() => setMenuOpen(false)}>Community</Link>
             <Link to='/projects' onClick={() => setMenuOpen(false)}>My Projects</Link>
             <Link to='/about' onClick={() => setMenuOpen(false)}>About</Link>
            

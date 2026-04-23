@@ -20,8 +20,8 @@ const View = () => {
       
       const {data} = await api.get(`/api/project/published/${projectId}`);
       
-      if(data?.current_code) {
-        setCode(data.current_code);
+      if(data?.code) {
+        setCode(data.code);
       } else {
         toast.error('Project code not found');
       }
